@@ -8,53 +8,290 @@
 <link rel="manifest" href="manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <style>
-:root {
-  --bg:#0a1020; --bg2:#101933; --card:#121d3a; --line:rgba(255,255,255,.10);
-  --text:#eef5ff; --muted:#a9bad3; --cyan:#74d8ff; --purple:#a98cff; --green:#79e2a8; --pink:#ff93c2;
+:root{
+  --bg:#0a1020;
+  --bg2:#101933;
+  --card:#121d3a;
+  --line:rgba(255,255,255,.10);
+  --text:#eef5ff;
+  --muted:#a9bad3;
+  --cyan:#74d8ff;
+  --purple:#a98cff;
+  --green:#79e2a8;
+  --pink:#ff93c2;
 }
 *{box-sizing:border-box}
-html,body{margin:0;padding:0;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+html,body{
+  margin:0;
+  padding:0;
+  background:linear-gradient(180deg,var(--bg),var(--bg2));
+  color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
 header{padding:22px 16px}
-.hero{max-width:1380px;margin:0 auto;padding:22px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(180deg,rgba(18,29,58,.96),rgba(10,16,32,.95));box-shadow:0 20px 42px rgba(0,0,0,.28)}
+.hero{
+  max-width:1380px;
+  margin:0 auto;
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:linear-gradient(180deg,rgba(18,29,58,.96),rgba(10,16,32,.95));
+  box-shadow:0 20px 42px rgba(0,0,0,.28);
+}
 .hero p{margin:.2rem 0;color:#d8e6f7}
-.hero h1{margin:.8rem 0 0;font-size:clamp(1.7rem,4vw,2.8rem);letter-spacing:.08em}
-.hero h2{margin:.35rem 0 0;color:var(--cyan);font-size:clamp(1.1rem,2.5vw,1.6rem);letter-spacing:.22em}
-.top-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:13px 18px;border:none;border-radius:18px;font-weight:800;cursor:pointer;text-decoration:none}
+.hero h1{
+  margin:.8rem 0 0;
+  font-size:clamp(1.7rem,4vw,2.8rem);
+  letter-spacing:.08em;
+}
+.hero h2{
+  margin:.35rem 0 0;
+  color:var(--cyan);
+  font-size:clamp(1.1rem,2.5vw,1.6rem);
+  letter-spacing:.22em;
+}
+.top-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:52px;
+  padding:13px 18px;
+  border:none;
+  border-radius:18px;
+  font-weight:800;
+  cursor:pointer;
+  text-decoration:none;
+}
 .btn.menu{background:linear-gradient(135deg,var(--cyan),#44c3f4);color:#08101f}
 .btn.install{background:linear-gradient(135deg,#ddd4ff,var(--purple));color:white}
 .btn.pdf{background:linear-gradient(135deg,#b7f1cb,var(--green));color:#08101f}
-.layout{max-width:1380px;margin:0 auto;padding:0 16px 20px;display:grid;grid-template-columns:340px 1fr;gap:18px}
-.sidebar,.panel{border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,rgba(18,29,58,.92),rgba(10,16,32,.92));box-shadow:0 18px 36px rgba(0,0,0,.24)}
+
+.layout{
+  max-width:1380px;
+  margin:0 auto;
+  padding:0 16px 20px;
+  display:grid;
+  grid-template-columns:340px 1fr;
+  gap:18px;
+}
+.sidebar,.panel{
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:linear-gradient(180deg,rgba(18,29,58,.92),rgba(10,16,32,.92));
+  box-shadow:0 18px 36px rgba(0,0,0,.24);
+}
 .sidebar{overflow:hidden}
-.sidebar-head{padding:16px;border-bottom:1px solid var(--line)}
+.sidebar-head{
+  padding:16px;
+  border-bottom:1px solid var(--line);
+}
 .sidebar-head h3{margin:0 0 10px}
-.search{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:#0d1730;color:var(--text);outline:none}
-.tabs{padding:12px;max-height:calc(100vh - 280px);overflow:auto}
-.region-title{margin:14px 8px 8px;color:var(--cyan);font-size:.8rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
-.tab-btn{width:100%;text-align:left;padding:12px 14px;border:none;border-radius:16px;background:rgba(255,255,255,.05);color:var(--text);margin:0 0 8px;cursor:pointer;border:1px solid rgba(255,255,255,.06)}
-.tab-btn.active{background:linear-gradient(135deg,rgba(116,216,255,.18),rgba(169,140,255,.16));border-color:rgba(116,216,255,.28)}
+.search{
+  width:100%;
+  padding:13px 14px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:#0d1730;
+  color:var(--text);
+  outline:none;
+}
+.tabs{
+  padding:12px;
+  max-height:calc(100vh - 280px);
+  overflow:auto;
+}
+.region-title{
+  margin:14px 8px 8px;
+  color:var(--cyan);
+  font-size:.8rem;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.tab-btn{
+  width:100%;
+  text-align:left;
+  padding:12px 14px;
+  border:none;
+  border-radius:16px;
+  background:rgba(255,255,255,.05);
+  color:var(--text);
+  margin:0 0 8px;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.06);
+}
+.tab-btn.active{
+  background:linear-gradient(135deg,rgba(116,216,255,.18),rgba(169,140,255,.16));
+  border-color:rgba(116,216,255,.28);
+}
 .content{display:grid;gap:18px}
 .panel{padding:20px}
-.badge{display:inline-flex;padding:8px 12px;border-radius:999px;background:rgba(116,216,255,.12);border:1px solid rgba(116,216,255,.24);color:var(--cyan);font-weight:800;margin-bottom:10px}
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
-.action{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:13px 16px;border:none;border-radius:16px;font-weight:800;cursor:pointer}
+.badge{
+  display:inline-flex;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(116,216,255,.12);
+  border:1px solid rgba(116,216,255,.24);
+  color:var(--cyan);
+  font-weight:800;
+  margin-bottom:10px;
+}
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:18px 0;
+}
+.action{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:52px;
+  padding:13px 16px;
+  border:none;
+  border-radius:16px;
+  font-weight:800;
+  cursor:pointer;
+}
 .action.photo{background:linear-gradient(135deg,var(--cyan),#44c3f4);color:#08101f}
 .action.import{background:linear-gradient(135deg,#ddd4ff,var(--purple));color:white}
 .action.pdf{background:linear-gradient(135deg,#b7f1cb,var(--green));color:#08101f}
 .action.three{background:linear-gradient(135deg,#ffc1da,var(--pink));color:#4b1230}
-.hidden{position:absolute;left:-9999px;opacity:0;width:1px;height:1px}
-textarea{width:100%;min-height:120px;padding:14px;border-radius:16px;border:1px solid var(--line);background:#0d1730;color:var(--text);resize:vertical}
+
+.hidden{
+  position:absolute;
+  left:-9999px;
+  opacity:0;
+  width:1px;
+  height:1px;
+}
+textarea{
+  width:100%;
+  min-height:120px;
+  padding:14px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:#0d1730;
+  color:var(--text);
+  resize:vertical;
+}
 .hint{color:var(--muted);font-size:.92rem}
-.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px}
-.photo-card{background:#0d1730;border:1px solid var(--line);border-radius:16px;padding:8px}
-.photo-card img{width:100%;height:auto;max-height:240px;object-fit:contain;background:#08101f;border-radius:12px;display:block}
-.photo-card button{width:100%;margin-top:8px;padding:8px;border:none;border-radius:12px;background:#351522;color:#ffd0dd;font-weight:800;cursor:pointer}
-#viewer{height:420px;border-radius:22px;border:1px solid var(--line);background:#050b14;overflow:hidden;touch-action:none;position:relative}
-#viewer canvas{display:block;width:100%!important;height:100%!important}
-footer{padding:0 16px 18px;color:var(--muted);text-align:center}
-@media (max-width:980px){.layout{grid-template-columns:1fr} .tabs{max-height:260px} .btn,.action{width:100%}}
-@media print{.top-actions,.sidebar,.three-panel{display:none!important} body{background:#fff;color:#000} .hero,.panel{background:#fff;border:1px solid #ccc;box-shadow:none} textarea{background:#fff;color:#000}}
+
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;
+  margin-top:12px;
+}
+.photo-card{
+  background:#0d1730;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:8px;
+}
+.photo-card img{
+  width:100%;
+  height:auto;
+  max-height:240px;
+  object-fit:contain;
+  background:#08101f;
+  border-radius:12px;
+  display:block;
+}
+.photo-card button{
+  width:100%;
+  margin-top:8px;
+  padding:8px;
+  border:none;
+  border-radius:12px;
+  background:#351522;
+  color:#ffd0dd;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.item-card{
+  margin-top:16px;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+}
+.item-card h4{
+  margin:0 0 10px;
+  font-size:1.05rem;
+  line-height:1.4;
+}
+.item-controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:12px 0;
+}
+.item-notes{
+  width:100%;
+  min-height:100px;
+  padding:14px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:#0d1730;
+  color:var(--text);
+  resize:vertical;
+}
+.item-gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+  margin-top:12px;
+}
+
+#viewer{
+  height:420px;
+  border-radius:22px;
+  border:1px solid var(--line);
+  background:#050b14;
+  overflow:hidden;
+  touch-action:none;
+  position:relative;
+}
+#viewer canvas{
+  display:block;
+  width:100%!important;
+  height:100%!important;
+}
+footer{
+  padding:0 16px 18px;
+  color:var(--muted);
+  text-align:center;
+}
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr}
+  .tabs{max-height:260px}
+  .btn,.action{width:100%}
+}
+@media print{
+  .top-actions,.sidebar,.three-panel,.item-controls,.photo-card button{
+    display:none!important;
+  }
+  body{background:#fff;color:#000}
+  .hero,.panel,.item-card{
+    background:#fff;
+    border:1px solid #ccc;
+    box-shadow:none;
+    color:#000;
+  }
+  textarea,.item-notes{
+    background:#fff;
+    color:#000;
+    border:1px solid #ccc;
+  }
+}
 </style>
 </head>
 <body>
@@ -86,22 +323,15 @@ footer{padding:0 16px 18px;color:var(--muted);text-align:center}
   <main class="content">
     <section class="panel">
       <div class="badge" id="regionBadge"></div>
-      <h3 id="title"></h3>
+      <h3 id="sectionTitle"></h3>
 
       <div class="controls">
-        <label class="action photo" for="cameraInput">📷 Tirar foto</label>
-        <label class="action import" for="importInput">📂 Importar fotos</label>
         <button class="action pdf" id="pdfBtn" type="button">🧾 Gerar PDF</button>
       </div>
 
-      <input class="hidden" id="cameraInput" type="file" accept="image/*" capture="environment" multiple>
-      <input class="hidden" id="importInput" type="file" accept="image/*" multiple>
+      <p class="hint">Cada nome aparece separado, com fotos, importação de arquivos e anotações próprias.</p>
 
-      <p class="hint">Os 165 nomes numerados e os subitens do roteiro estão nesta versão, exatamente como no documento.</p>
-      <textarea id="notes" placeholder="Anotações da prática"></textarea>
-
-      <h4>Galeria de fotos</h4>
-      <div class="gallery" id="gallery"></div>
+      <div id="itemsContainer"></div>
     </section>
 
     <section class="panel three-panel">
@@ -123,24 +353,242 @@ footer{padding:0 16px 18px;color:var(--muted);text-align:center}
 <footer>Responsável tecnológico: Profª Drª Claudia Pinheiro</footer>
 
 <script>
-const SECTIONS = [{"id": "generalidades", "title": "GENERALIDADES", "items": ["1. Ventre muscular", "2. Tendão muscular", "3. Aponeurose", "4. Fáscia muscular", "5. Septo intermuscular", "6. Músculo de fibra paralela (ex.: m. sartório)", "7. Músculo de fibras oblíquas (ex.: m. oblíquo externo do abdome)", "8. Músculo semipeniforme (ex.: m. extensor longo dos dedos)", "9. Músculo peniforme (ex.: m. reto femoral)", "10. Músculo multipeniforme (ex.: m. deltoide)", "11. Músculo convergente ou triangular (ex.: m. peitoral maior)", "12. Músculo circular ou esfincteriano (ex.: m. orbicular do olho)", "13. Músculo curto (ex.: m. pronador quadrado)", "14. Músculo longo (ex.: m. sartório)", "15. Músculo plano (ex.: m. oblíquo externo do abdome)", "16. Músculo superficial (ex.: m. trapézio)", "17. Músculo profundo (ex.: m. transverso do abdome)", "18. Músculo fusiforme (ex.: m. tibial anterior)", "19. Músculo bíceps (ex.: m. bíceps braquial, m. bíceps femoral)", "20. Músculo tríceps (ex.: m. tríceps braquial, m. tríceps sural)", "21. Músculo quadríceps (ex.: m. quadríceps femoral)", "22. Músculo bicaudado (ex.: m. flexor curto do hálux)", "23. Músculo policaudado (ex.: m. extensor dos dedos)", "24. Músculo biventre (ex.: m. digástrico)", "25. Músculo poliventre (ex.: m. reto do abdome)"]}, {"id": "dorso", "title": "MÚSCULOS DO DORSO", "items": ["26. Trapézio - Parte descendente", "27. Trapézio - Parte transversa", "28. Trapézio - Parte ascendente", "29. Latíssimo do dorso", "30. Aponeurose toracolombar", "31. Levantador da escápula", "32. Romboide maior", "33. Romboide menor", "34. Serrátil posterior superior", "35. Serrátil posterior inferior", "36. Eretor da espinha", "33. Espinal do tórax", "34. Longuíssimo do tórax", "35. Íliocostal do lombo", "36. Aponeurose do m. eretor da espinha", "37. Semiespinal do tórax", "38. Multífidos do tórax", "39. Multífidos do lombo", "40. Rotadores do tórax", "41. Rotadores do lombo", "42. Intertransversários do lombo", "43. Interespinais do tórax", "44. Interespinais do lombo", "45. Levantadores das costelas"]}, {"id": "torax", "title": "MÚSCULOS DO TÓRAX", "items": ["46. Peitoral maior - Parte clavicular", "47. Peitoral maior - Parte esternocostal", "48. Peitoral maior - Parte abdominal", "49. Peitoral menor", "50. Subclávio", "51. Serrátil anterior", "52. Serrátil posterior superior", "53. Serrátil posterior inferior", "54. Levantadores das costelas", "55. Intercostais externos", "56. Intercostais internos", "57. Membrana intercostal interna", "58. Membrana intercostal externa", "59. Transverso do tórax", "60. Subcostais", "61. Diafragma"]}, {"id": "abdome", "title": "MÚSCULOS DO ABDOME", "items": ["62. Reto do abdome", "a. Lâmina anterior da bainha do músculo reto do abdome", "b. Lâmina posterior da bainha do músculo reto do abdome", "c. Intersecções tendíneas do músculo reto do abdome", "60. Oblíquo externo do abdome", "61. Oblíquo interno do abdome", "62. Linha alba", "63. Transverso do abdome", "64. Quadrado do lombo"]}, {"id": "membro_superior", "title": "MÚSCULOS DO MEMBRO SUPERIOR", "items": ["65. Deltoide - Parte clavicular", "66. Deltoide - Parte acromial", "67. Deltoide - Parte espinal", "68. Supra-espinal", "a. Fáscia supra-espinal", "69. Infra-espinal", "a. Fáscia infra-espinal", "70. Redondo menor", "a. Fáscia do m. redondo menor", "71. Redondo maior", "a. Fáscia do m. redondo maior", "72. Subescapular", "a. Fáscia subescapular", "73. Coracobraquial", "74. Bíceps braquial - Cabeça curta", "75. Bíceps braquial - Cabeça longa", "76. Aponeurose do m. bíceps braquial", "77. Braquial", "78. Tríceps braquial - Cabeça longa", "79. Tríceps braquial - Cabeça curta", "80. Tríceps braquial - Cabeça medial", "81. Ancôneo", "82. Pronador redondo", "83. Pronador quadrado", "84. Supinador", "85. Palmar longo", "86. Flexor radial do carpo", "87. Flexor ulnar do carpo", "88. Flexor superficial dos dedos", "89. Flexor profundo dos dedos", "90. Flexor longo do polegar", "91. Braquiorradial", "92. Extensor radial longo do carpo", "93. Extensor radial curto do carpo", "94. Extensor ulnar do carpo", "95. Extensor dos dedos", "96. Extensor do dedo mínimo", "97. Abdutor longo do polegar", "98. Extensor curto do polegar", "99. Extensor longo polegar", "100. Extensor do indicador", "101. Palmar curto", "102. Abdutor do dedo mínimo", "103. Flexor curto do dedo mínimo", "104. Oponente do dedo mínimo", "105. Abdutor curto do polegar", "106. Flexor curto do polegar", "107. Oponente do polegar", "108. Adutor do polegar", "109. Lumbricais", "110. Interósseos dorsais", "111. Interósseos palmares"]}, {"id": "membro_inferior", "title": "MÚSCULOS DO MEMBRO INFERIOR", "items": ["112. Íiopsoas", "a. Ilíaco", "b. Psoas maior", "c. Psoas menor*", "113. Pectíneo", "114. Sartório", "115. Quadríceps femoral - Reto femoral", "116. Quadríceps femoral - Vasto lateral", "117. Quadríceps femoral - Vasto medial", "118. Quadríceps femoral - Vasto intermédio", "119. Adutor longo", "120. Adutor curto", "121. Adutor magno", "122. Grácil", "123. Tibial anterior", "124. Extensor longo dos dedos", "125. Fibular terceiro", "126. Extensor longo do hálux", "127. Fibular longo", "128. Fibular curto", "129. Tensor da fáscia lata", "130. Glúteo máximo", "131. Glúteo médio", "132. Glúteo mínimo", "133. Piriforme", "134. Gêmeo superior", "135. Obturador interno", "136. Gêmeo inferior", "137. Quadrado femoral", "138. Bíceps femoral - Cabeça longa", "139. Bíceps femoral - Cabeça curta", "140. Semitendíneo", "141. Semimembranáceo", "142. Tríceps sural", "a. Gastrocnêmio - cabeça medial", "b. Gastrocnêmio - cabeça lateral", "c. Sóleo", "d. Tendão do calcâneo", "143. Plantar", "144. Poplíteo", "145. Flexor longo do hálux", "146. Tibial posterior", "147. Flexor longo dos dedos", "148. Extensor curto dos dedos", "149. Extensor curto do hálux", "150. Aponeurose plantar", "151. Flexor curto dos dedos", "152. Abdutor do hálux", "153. Abdutor do dedo mínimo", "154. Quadrado plantar", "155. Tendões do m. flexor longo dos dedos", "156. Lumbricais", "157. Flexor curto do hálux - Cabeça medial", "158. Tendão do flexor longo do hálux", "159. Flexor curto do hálux - Cabeça lateral", "160. Adutor do hálux - Cabeça oblíqua", "161. Adutor do hálux - Cabeça transversa*", "162. Flexor curto do dedo mínimo", "163. Oponente do dedo mínimo m.", "164. Interósseos dorsais", "165. Interósseos plantares"]}];
+const SECTIONS = [
+  {
+    id: "generalidades",
+    title: "GENERALIDADES",
+    items: [
+      "1. Ventre muscular",
+      "2. Tendão muscular",
+      "3. Aponeurose",
+      "4. Fáscia muscular",
+      "5. Septo intermuscular",
+      "6. Músculo de fibra paralela (ex.: m. sartório)",
+      "7. Músculo de fibras oblíquas (ex.: m. oblíquo externo do abdome)",
+      "8. Músculo semipeniforme (ex.: m. extensor longo dos dedos)",
+      "9. Músculo peniforme (ex.: m. reto femoral)",
+      "10. Músculo multipeniforme (ex.: m. deltoide)",
+      "11. Músculo convergente ou triangular (ex.: m. peitoral maior)",
+      "12. Músculo circular ou esfincteriano (ex.: m. orbicular do olho)",
+      "13. Músculo curto (ex.: m. pronador quadrado)",
+      "14. Músculo longo (ex.: m. sartório)",
+      "15. Músculo plano (ex.: m. oblíquo externo do abdome)",
+      "16. Músculo superficial (ex.: m. trapézio)",
+      "17. Músculo profundo (ex.: m. transverso do abdome)",
+      "18. Músculo fusiforme (ex.: m. tibial anterior)",
+      "19. Músculo bíceps (ex.: m. bíceps braquial, m. bíceps femoral)",
+      "20. Músculo tríceps (ex.: m. tríceps braquial, m. tríceps sural)",
+      "21. Músculo quadríceps (ex.: m. quadríceps femoral)",
+      "22. Músculo bicaudado (ex.: m. flexor curto do hálux)",
+      "23. Músculo policaudado (ex.: m. extensor dos dedos)",
+      "24. Músculo biventre (ex.: m. digástrico)",
+      "25. Músculo poliventre (ex.: m. reto do abdome)"
+    ]
+  },
+  {
+    id: "dorso",
+    title: "MÚSCULOS DO DORSO",
+    items: [
+      "26. Trapézio - Parte descendente",
+      "27. Trapézio - Parte transversa",
+      "28. Trapézio - Parte ascendente",
+      "29. Latíssimo do dorso",
+      "30. Aponeurose toracolombar",
+      "31. Levantador da escápula",
+      "32. Romboide maior",
+      "33. Romboide menor",
+      "34. Serrátil posterior superior",
+      "35. Serrátil posterior inferior",
+      "36. Eretor da espinha",
+      "33. Espinal do tórax",
+      "34. Longuíssimo do tórax",
+      "35. Íliocostal do lombo",
+      "36. Aponeurose do m. eretor da espinha",
+      "37. Semiespinal do tórax",
+      "38. Multífidos do tórax",
+      "39. Multífidos do lombo",
+      "40. Rotadores do tórax",
+      "41. Rotadores do lombo",
+      "42. Intertransversários do lombo",
+      "43. Interespinais do tórax",
+      "44. Interespinais do lombo",
+      "45. Levantadores das costelas"
+    ]
+  },
+  {
+    id: "torax",
+    title: "MÚSCULOS DO TÓRAX",
+    items: [
+      "46. Peitoral maior - Parte clavicular",
+      "47. Peitoral maior - Parte esternocostal",
+      "48. Peitoral maior - Parte abdominal",
+      "49. Peitoral menor",
+      "50. Subclávio",
+      "51. Serrátil anterior",
+      "52. Serrátil posterior superior",
+      "53. Serrátil posterior inferior",
+      "54. Levantadores das costelas",
+      "55. Intercostais externos",
+      "56. Intercostais internos",
+      "57. Membrana intercostal interna",
+      "58. Membrana intercostal externa",
+      "59. Transverso do tórax",
+      "60. Subcostais",
+      "61. Diafragma"
+    ]
+  },
+  {
+    id: "abdome",
+    title: "MÚSCULOS DO ABDOME",
+    items: [
+      "62. Reto do abdome",
+      "a. Lâmina anterior da bainha do músculo reto do abdome",
+      "b. Lâmina posterior da bainha do músculo reto do abdome",
+      "c. Intersecções tendíneas do músculo reto do abdome",
+      "60. Oblíquo externo do abdome",
+      "61. Oblíquo interno do abdome",
+      "62. Linha alba",
+      "63. Transverso do abdome",
+      "64. Quadrado do lombo"
+    ]
+  },
+  {
+    id: "membro_superior",
+    title: "MÚSCULOS DO MEMBRO SUPERIOR",
+    items: [
+      "65. Deltoide - Parte clavicular",
+      "66. Deltoide - Parte acromial",
+      "67. Deltoide - Parte espinal",
+      "68. Supra-espinal",
+      "a. Fáscia supra-espinal",
+      "69. Infra-espinal",
+      "a. Fáscia infra-espinal",
+      "70. Redondo menor",
+      "a. Fáscia do m. redondo menor",
+      "71. Redondo maior",
+      "a. Fáscia do m. redondo maior",
+      "72. Subescapular",
+      "a. Fáscia subescapular",
+      "73. Coracobraquial",
+      "74. Bíceps braquial - Cabeça curta",
+      "75. Bíceps braquial - Cabeça longa",
+      "76. Aponeurose do m. bíceps braquial",
+      "77. Braquial",
+      "78. Tríceps braquial - Cabeça longa",
+      "79. Tríceps braquial - Cabeça curta",
+      "80. Tríceps braquial - Cabeça medial",
+      "81. Ancôneo",
+      "82. Pronador redondo",
+      "83. Pronador quadrado",
+      "84. Supinador",
+      "85. Palmar longo",
+      "86. Flexor radial do carpo",
+      "87. Flexor ulnar do carpo",
+      "88. Flexor superficial dos dedos",
+      "89. Flexor profundo dos dedos",
+      "90. Flexor longo do polegar",
+      "91. Braquiorradial",
+      "92. Extensor radial longo do carpo",
+      "93. Extensor radial curto do carpo",
+      "94. Extensor ulnar do carpo",
+      "95. Extensor dos dedos",
+      "96. Extensor do dedo mínimo",
+      "97. Abdutor longo do polegar",
+      "98. Extensor curto do polegar",
+      "99. Extensor longo polegar",
+      "100. Extensor do indicador",
+      "101. Palmar curto",
+      "102. Abdutor do dedo mínimo",
+      "103. Flexor curto do dedo mínimo",
+      "104. Oponente do dedo mínimo",
+      "105. Abdutor curto do polegar",
+      "106. Flexor curto do polegar",
+      "107. Oponente do polegar",
+      "108. Adutor do polegar",
+      "109. Lumbricais",
+      "110. Interósseos dorsais",
+      "111. Interósseos palmares"
+    ]
+  },
+  {
+    id: "membro_inferior",
+    title: "MÚSCULOS DO MEMBRO INFERIOR",
+    items: [
+      "112. Íiopsoas",
+      "a. Ilíaco",
+      "b. Psoas maior",
+      "c. Psoas menor*",
+      "113. Pectíneo",
+      "114. Sartório",
+      "115. Quadríceps femoral - Reto femoral",
+      "116. Quadríceps femoral - Vasto lateral",
+      "117. Quadríceps femoral - Vasto medial",
+      "118. Quadríceps femoral - Vasto intermédio",
+      "119. Adutor longo",
+      "120. Adutor curto",
+      "121. Adutor magno",
+      "122. Grácil",
+      "123. Tibial anterior",
+      "124. Extensor longo dos dedos",
+      "125. Fibular terceiro",
+      "126. Extensor longo do hálux",
+      "127. Fibular longo",
+      "128. Fibular curto",
+      "129. Tensor da fáscia lata",
+      "130. Glúteo máximo",
+      "131. Glúteo médio",
+      "132. Glúteo mínimo",
+      "133. Piriforme",
+      "134. Gêmeo superior",
+      "135. Obturador interno",
+      "136. Gêmeo inferior",
+      "137. Quadrado femoral",
+      "138. Bíceps femoral - Cabeça longa",
+      "139. Bíceps femoral - Cabeça curta",
+      "140. Semitendíneo",
+      "141. Semimembranáceo",
+      "142. Tríceps sural",
+      "a. Gastrocnêmio - cabeça medial",
+      "b. Gastrocnêmio - cabeça lateral",
+      "c. Sóleo",
+      "d. Tendão do calcâneo",
+      "143. Plantar",
+      "144. Poplíteo",
+      "145. Flexor longo do hálux",
+      "146. Tibial posterior",
+      "147. Flexor longo dos dedos",
+      "148. Extensor curto dos dedos",
+      "149. Extensor curto do hálux",
+      "150. Aponeurose plantar",
+      "151. Flexor curto dos dedos",
+      "152. Abdutor do hálux",
+      "153. Abdutor do dedo mínimo",
+      "154. Quadrado plantar",
+      "155. Tendões do m. flexor longo dos dedos",
+      "156. Lumbricais",
+      "157. Flexor curto do hálux - Cabeça medial",
+      "158. Tendão do flexor longo do hálux",
+      "159. Flexor curto do hálux - Cabeça lateral",
+      "160. Adutor do hálux - Cabeça oblíqua",
+      "161. Adutor do hálux - Cabeça transversa*",
+      "162. Flexor curto do dedo mínimo",
+      "163. Oponente do dedo mínimo m.",
+      "164. Interósseos dorsais",
+      "165. Interósseos plantares"
+    ]
+  }
+];
+
 let currentSectionIndex = 0;
 let deferredPrompt = null;
 let rendererRef = null, sceneRef = null, cameraRef = null, modelGroup = null, animId = null;
 let isDragging = false, lastX = 0, lastY = 0, zoom = 6, rotX = 0, rotY = 0, pinchStartDist = null;
 
-function storageKey(suffix) {
-  return `miologia:${currentSectionIndex}:${suffix}`;
-}
-
 const tabs = document.getElementById('tabs');
 const searchInput = document.getElementById('searchInput');
 const regionBadge = document.getElementById('regionBadge');
-const title = document.getElementById('title');
-const notes = document.getElementById('notes');
-const gallery = document.getElementById('gallery');
-const cameraInput = document.getElementById('cameraInput');
-const importInput = document.getElementById('importInput');
+const sectionTitle = document.getElementById('sectionTitle');
+const itemsContainer = document.getElementById('itemsContainer');
 const threeInput = document.getElementById('threeInput');
 const threePreview = document.getElementById('threePreview');
 const viewer = document.getElementById('viewer');
@@ -149,50 +597,55 @@ const pdfBtn = document.getElementById('pdfBtn');
 const pdfTopBtn = document.getElementById('pdfTopBtn');
 const openMenuBtn = document.getElementById('openMenuBtn');
 
-function buildTabs() {
+function sectionItemKey(sectionIndex, itemIndex, suffix){
+  return `miologia:${sectionIndex}:${itemIndex}:${suffix}`;
+}
+
+function buildTabs(){
   const q = (searchInput.value || '').toLowerCase().trim();
   tabs.innerHTML = '';
+
   SECTIONS.forEach((sec, idx) => {
     const text = (sec.title + ' ' + sec.items.join(' ')).toLowerCase();
     if (q && !text.includes(q)) return;
+
     const region = document.createElement('div');
     region.className = 'region-title';
     region.textContent = sec.title;
     tabs.appendChild(region);
 
-    sec.items.forEach(item => {
-      if (q && !item.toLowerCase().includes(q) && !sec.title.toLowerCase().includes(q)) return;
-      const b = document.createElement('button');
-      b.className = 'tab-btn' + (idx === currentSectionIndex ? ' active' : '');
-      b.textContent = item;
-      b.type = 'button';
-      b.onclick = () => {
-        currentSectionIndex = idx;
-        loadSection();
-        buildTabs();
-      };
-      tabs.appendChild(b);
-    });
+    const b = document.createElement('button');
+    b.className = 'tab-btn' + (idx === currentSectionIndex ? ' active' : '');
+    b.textContent = sec.title;
+    b.type = 'button';
+    b.onclick = () => {
+      currentSectionIndex = idx;
+      loadSection();
+      buildTabs();
+    };
+    tabs.appendChild(b);
   });
 }
 
-function loadSection() {
+function loadSection(){
   const sec = SECTIONS[currentSectionIndex];
   regionBadge.textContent = sec.title;
-  title.textContent = sec.items.join(' • ');
-  notes.value = localStorage.getItem(storageKey('notes')) || '';
-  renderGallery();
+  sectionTitle.textContent = sec.title;
+  renderItems();
 }
 
-function saveNotes() {
-  localStorage.setItem(storageKey('notes'), notes.value);
+function saveItemNotes(sectionIndex, itemIndex, value){
+  localStorage.setItem(sectionItemKey(sectionIndex, itemIndex, 'notes'), value);
 }
 
-function addImages(files, key) {
+function addItemImages(files, sectionIndex, itemIndex){
   const arr = Array.from(files || []);
   if (!arr.length) return;
+
+  const key = sectionItemKey(sectionIndex, itemIndex, 'imgs');
   const current = JSON.parse(localStorage.getItem(key) || '[]');
   let pending = arr.length;
+
   arr.forEach(file => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -200,41 +653,155 @@ function addImages(files, key) {
       pending--;
       if (pending === 0) {
         localStorage.setItem(key, JSON.stringify(current));
-        if (key === storageKey('imgs')) renderGallery();
-        if (key === 'miologia:3dimgs') render3DPreview();
+        renderItems();
       }
     };
     reader.readAsDataURL(file);
   });
 }
 
-function renderGallery() {
-  gallery.innerHTML = '';
-  const imgs = JSON.parse(localStorage.getItem(storageKey('imgs')) || '[]');
-  imgs.forEach((src, idx) => {
+function deleteItemImage(sectionIndex, itemIndex, imgIndex){
+  const key = sectionItemKey(sectionIndex, itemIndex, 'imgs');
+  const arr = JSON.parse(localStorage.getItem(key) || '[]');
+  arr.splice(imgIndex, 1);
+  localStorage.setItem(key, JSON.stringify(arr));
+  renderItems();
+}
+
+function renderItems(){
+  const sec = SECTIONS[currentSectionIndex];
+  const q = (searchInput.value || '').toLowerCase().trim();
+  itemsContainer.innerHTML = '';
+
+  sec.items.forEach((item, itemIndex) => {
+    if (q && !item.toLowerCase().includes(q) && !sec.title.toLowerCase().includes(q)) return;
+
+    const notesValue = localStorage.getItem(sectionItemKey(currentSectionIndex, itemIndex, 'notes')) || '';
+    const imgs = JSON.parse(localStorage.getItem(sectionItemKey(currentSectionIndex, itemIndex, 'imgs')) || '[]');
+
     const card = document.createElement('div');
-    card.className = 'photo-card';
-    card.innerHTML = `<img src="${src}" alt="Foto da prática">`;
-    const del = document.createElement('button');
-    del.textContent = 'Excluir';
-    del.onclick = () => {
-      const arr = JSON.parse(localStorage.getItem(storageKey('imgs')) || '[]');
-      arr.splice(idx, 1);
-      localStorage.setItem(storageKey('imgs'), JSON.stringify(arr));
-      renderGallery();
-    };
-    card.appendChild(del);
-    gallery.appendChild(card);
+    card.className = 'item-card';
+
+    const titleEl = document.createElement('h4');
+    titleEl.textContent = item;
+    card.appendChild(titleEl);
+
+    const controls = document.createElement('div');
+    controls.className = 'item-controls';
+
+    const camId = `camera-${currentSectionIndex}-${itemIndex}`;
+    const impId = `import-${currentSectionIndex}-${itemIndex}`;
+
+    const camLabel = document.createElement('label');
+    camLabel.className = 'action photo';
+    camLabel.setAttribute('for', camId);
+    camLabel.textContent = '📷 Tirar foto';
+
+    const importLabel = document.createElement('label');
+    importLabel.className = 'action import';
+    importLabel.setAttribute('for', impId);
+    importLabel.textContent = '📂 Importar arquivos';
+
+    controls.appendChild(camLabel);
+    controls.appendChild(importLabel);
+    card.appendChild(controls);
+
+    const cameraInputEl = document.createElement('input');
+    cameraInputEl.className = 'hidden';
+    cameraInputEl.type = 'file';
+    cameraInputEl.accept = 'image/*';
+    cameraInputEl.setAttribute('capture', 'environment');
+    cameraInputEl.multiple = true;
+    cameraInputEl.id = camId;
+    cameraInputEl.addEventListener('change', (e) => {
+      addItemImages(e.target.files, currentSectionIndex, itemIndex);
+      e.target.value = '';
+    });
+    card.appendChild(cameraInputEl);
+
+    const importInputEl = document.createElement('input');
+    importInputEl.className = 'hidden';
+    importInputEl.type = 'file';
+    importInputEl.accept = 'image/*';
+    importInputEl.multiple = true;
+    importInputEl.id = impId;
+    importInputEl.addEventListener('change', (e) => {
+      addItemImages(e.target.files, currentSectionIndex, itemIndex);
+      e.target.value = '';
+    });
+    card.appendChild(importInputEl);
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'item-notes';
+    textarea.placeholder = 'Anotações desta estrutura';
+    textarea.value = notesValue;
+    textarea.addEventListener('input', (e) => {
+      saveItemNotes(currentSectionIndex, itemIndex, e.target.value);
+    });
+    card.appendChild(textarea);
+
+    const gallery = document.createElement('div');
+    gallery.className = 'item-gallery';
+
+    imgs.forEach((src, imgIndex) => {
+      const photoCard = document.createElement('div');
+      photoCard.className = 'photo-card';
+
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = item;
+      photoCard.appendChild(img);
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.textContent = 'Excluir';
+      del.addEventListener('click', () => {
+        deleteItemImage(currentSectionIndex, itemIndex, imgIndex);
+      });
+
+      photoCard.appendChild(del);
+      gallery.appendChild(photoCard);
+    });
+
+    card.appendChild(gallery);
+    itemsContainer.appendChild(card);
   });
 }
 
-function render3DPreview() {
+function add3DImages(files){
+  const arr = Array.from(files || []);
+  if (!arr.length) return;
+  const key = 'miologia:3dimgs';
+  const current = JSON.parse(localStorage.getItem(key) || '[]');
+  let pending = arr.length;
+
+  arr.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      current.push(reader.result);
+      pending--;
+      if (pending === 0) {
+        localStorage.setItem(key, JSON.stringify(current));
+        render3DPreview();
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function render3DPreview(){
   threePreview.innerHTML = '';
   const imgs = JSON.parse(localStorage.getItem('miologia:3dimgs') || '[]');
+
   imgs.forEach((src, idx) => {
     const card = document.createElement('div');
     card.className = 'photo-card';
-    card.innerHTML = `<img src="${src}" alt="Imagem para 3D">`;
+
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'Imagem para 3D';
+    card.appendChild(img);
+
     const del = document.createElement('button');
     del.textContent = 'Excluir';
     del.onclick = () => {
@@ -243,24 +810,35 @@ function render3DPreview() {
       localStorage.setItem('miologia:3dimgs', JSON.stringify(arr));
       render3DPreview();
     };
+
     card.appendChild(del);
     threePreview.appendChild(card);
   });
 }
 
-function clear3D() {
+function clear3D(){
   if (animId) cancelAnimationFrame(animId);
   if (rendererRef) {
     rendererRef.dispose();
-    if (rendererRef.domElement && rendererRef.domElement.parentNode) rendererRef.domElement.parentNode.removeChild(rendererRef.domElement);
+    if (rendererRef.domElement && rendererRef.domElement.parentNode) {
+      rendererRef.domElement.parentNode.removeChild(rendererRef.domElement);
+    }
   }
   viewer.innerHTML = '';
-  rendererRef = sceneRef = cameraRef = modelGroup = null;
+  rendererRef = null;
+  sceneRef = null;
+  cameraRef = null;
+  modelGroup = null;
   animId = null;
 }
 
-function bind3DControls() {
-  viewer.onpointerdown = e => { isDragging = true; lastX = e.clientX; lastY = e.clientY; };
+function bind3DControls(){
+  viewer.onpointerdown = e => {
+    isDragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+  };
+
   viewer.onpointermove = e => {
     if (!isDragging || !modelGroup) return;
     const dx = e.clientX - lastX;
@@ -269,22 +847,27 @@ function bind3DControls() {
     rotX += dy * 0.01;
     modelGroup.rotation.y = rotY;
     modelGroup.rotation.x = rotX;
-    lastX = e.clientX; lastY = e.clientY;
+    lastX = e.clientX;
+    lastY = e.clientY;
   };
+
   viewer.onpointerup = () => { isDragging = false; };
   viewer.onpointercancel = () => { isDragging = false; };
+
   viewer.onwheel = e => {
     e.preventDefault();
     zoom += e.deltaY * 0.003;
     zoom = Math.min(12, Math.max(2.5, zoom));
     if (cameraRef) cameraRef.position.z = zoom;
   };
+
   viewer.ontouchmove = e => {
     if (e.touches.length === 2) {
       e.preventDefault();
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const dist = Math.sqrt(dx*dx + dy*dy);
+
       if (pinchStartDist !== null) {
         const delta = pinchStartDist - dist;
         zoom += delta * 0.01;
@@ -294,69 +877,101 @@ function bind3DControls() {
       pinchStartDist = dist;
     }
   };
+
   viewer.ontouchend = () => { pinchStartDist = null; };
 }
 
-function gerar3D() {
+function gerar3D(){
   clear3D();
+
   sceneRef = new THREE.Scene();
   cameraRef = new THREE.PerspectiveCamera(70, viewer.clientWidth / viewer.clientHeight, 0.1, 1000);
-  rendererRef = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  rendererRef = new THREE.WebGLRenderer({ antialias:true, alpha:true });
   rendererRef.setSize(viewer.clientWidth, viewer.clientHeight);
   rendererRef.setPixelRatio(window.devicePixelRatio || 1);
   viewer.appendChild(rendererRef.domElement);
-  zoom = 6; rotX = 0; rotY = 0;
+
+  zoom = 6;
+  rotX = 0;
+  rotY = 0;
+
   cameraRef.position.set(0, 0, zoom);
   sceneRef.add(new THREE.AmbientLight(0xffffff, 1.5));
+
   modelGroup = new THREE.Group();
   sceneRef.add(modelGroup);
 
   const imgs = JSON.parse(localStorage.getItem('miologia:3dimgs') || '[]');
+
   if (!imgs.length) {
     const geo = new THREE.TorusKnotGeometry(1.1, 0.35, 120, 16);
     const mat = new THREE.MeshNormalMaterial();
-    modelGroup.add(new THREE.Mesh(geo, mat));
+    const mesh = new THREE.Mesh(geo, mat);
+    modelGroup.add(mesh);
   } else {
     const loader = new THREE.TextureLoader();
     imgs.forEach((src, i) => {
       const tex = loader.load(src);
       const geo = new THREE.PlaneGeometry(2.4, 2.4);
-      const mat = new THREE.MeshBasicMaterial({map: tex, side: THREE.DoubleSide, transparent: true});
+      const mat = new THREE.MeshBasicMaterial({
+        map: tex,
+        side: THREE.DoubleSide,
+        transparent: true
+      });
       const mesh = new THREE.Mesh(geo, mat);
       const angle = (Math.PI * 2 / imgs.length) * i;
       const radius = Math.max(1.5, imgs.length * 0.08);
-      mesh.position.set(Math.cos(angle) * radius, ((i % 5) - 2) * 0.25, Math.sin(angle) * radius);
+
+      mesh.position.set(
+        Math.cos(angle) * radius,
+        ((i % 5) - 2) * 0.25,
+        Math.sin(angle) * radius
+      );
       mesh.lookAt(0, 0, 0);
       modelGroup.add(mesh);
     });
   }
+
   bind3DControls();
-  function animate() {
+
+  function animate(){
     animId = requestAnimationFrame(animate);
     rendererRef.render(sceneRef, cameraRef);
   }
   animate();
 }
 
-cameraInput.addEventListener('change', e => addImages(e.target.files, storageKey('imgs')));
-importInput.addEventListener('change', e => addImages(e.target.files, storageKey('imgs')));
-threeInput.addEventListener('change', e => addImages(e.target.files, 'miologia:3dimgs'));
-notes.addEventListener('input', saveNotes);
-searchInput.addEventListener('input', buildTabs);
+threeInput.addEventListener('change', e => {
+  add3DImages(e.target.files);
+  e.target.value = '';
+});
+
+searchInput.addEventListener('input', () => {
+  buildTabs();
+  renderItems();
+});
+
 pdfBtn.addEventListener('click', () => window.print());
 pdfTopBtn.addEventListener('click', () => window.print());
-document.getElementById('threeBtn')?.addEventListener('click', gerar3D);
+document.getElementById('threeBtn').addEventListener('click', gerar3D);
 
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPrompt = e;
 });
+
 installBtn.addEventListener('click', async () => {
-  if (deferredPrompt) deferredPrompt.prompt();
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+  } else {
+    alert('No celular, abra o menu do navegador e escolha "Adicionar à tela inicial".');
+  }
 });
+
 openMenuBtn.addEventListener('click', () => {
   document.getElementById('sidebar').scrollIntoView({behavior:'smooth'});
 });
+
 window.addEventListener('resize', () => {
   if (rendererRef && cameraRef) {
     cameraRef.aspect = viewer.clientWidth / viewer.clientHeight;
@@ -370,4 +985,4 @@ loadSection();
 render3DPreview();
 </script>
 </body>
-</html>
+  </html>
