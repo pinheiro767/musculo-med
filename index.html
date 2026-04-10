@@ -1,94 +1,891 @@
-
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Roteiro Prático de Anatomia</title>
-  <meta name="theme-color" content="#07101f">
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-</head>
-<body>
-  <div class="app-shell">
-    <header class="hero">
-      <div class="hero-content">
-        <p class="header-line">Universidade Estadual de Maringá</p>
-        <p class="header-line">Departamento de Ciências Morfológicas – DCM</p>
-        <p class="header-line">Roteiro prático - Anatomia Humana</p>
-        <p class="header-line">Profª Drª. Carmem Patrícia Barbosa</p>
-        <div class="title-wrap">
-          <h1>ANATOMIA HUMANA</h1>
-          <h2>MIOLOGIA</h2>
-        </div>
-
-        <div class="hero-actions">
-          <button class="glass-btn primary" id="openMenuBtn" type="button">Abrir roteiro</button>
-          <button class="glass-btn" id="installBtn" type="button">Baixar app</button>
-          <button class="glass-btn" id="pdfTopBtn" type="button">Gerar PDF</button>
-        </div>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anatomia Humana - Miologia</title>
+  <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Anatomia%20Humana%20-%20Miologia%22%2C%22short_name%22%3A%22Miologia%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0e1a%22%2C%22theme_color%22%3A%22%230a0e1a%22%7D">
+  <meta name="theme-color" content="#0a0e1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=DM+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+.app-shell{height:100%;overflow:hidden;display:flex;flex-direction:column;background:#0a0e1a;color:#e8e6e1}
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.font-serif{font-family:'Instrument Serif',Georgia,serif}
+.font-body{font-family:'DM Sans',system-ui,sans-serif}
+.section-card{background:linear-gradient(135deg,#12182b 0%,#1a2240 100%);border:1px solid rgba(99,134,255,.12);border-radius:16px;transition:all .3s}
+.section-card:hover{border-color:rgba(99,134,255,.3);box-shadow:0 0 30px rgba(99,134,255,.06)}
+.btn-primary{background:linear-gradient(135deg,#4f6ef7,#6c5ce7);border:none;color:#fff;border-radius:12px;padding:10px 20px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,110,247,.3)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-secondary{background:rgba(99,134,255,.1);border:1px solid rgba(99,134,255,.2);color:#8fa4ff;border-radius:12px;padding:8px 16px;cursor:pointer;transition:all .2s}
+.btn-secondary:hover{background:rgba(99,134,255,.2)}
+.btn-danger{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.2);color:#ff4757;border-radius:10px;padding:6px 14px;cursor:pointer;transition:all .2s;font-size:13px}
+.btn-danger:hover{background:rgba(255,71,87,.2)}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.photo-thumb:hover{border-color:#4f6ef7}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb .del-btn{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);border:none;color:#ff4757;width:24px;height:24px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.photo-thumb:hover .del-btn{opacity:1}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-content{background:#12182b;border:1px solid rgba(99,134,255,.15);border-radius:20px;max-width:600px;width:100%;max-height:90%;overflow-y:auto;padding:24px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a2240;border:1px solid rgba(99,134,255,.2);color:#8fa4ff;padding:12px 24px;border-radius:12px;z-index:200;font-size:14px;animation:fadeInUp .3s}
+@keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.nav-tab{padding:10px 16px;border-radius:10px;cursor:pointer;transition:all .2s;font-size:14px;font-weight:500;white-space:nowrap}
+.nav-tab.active{background:rgba(79,110,247,.15);color:#8fa4ff}
+.nav-tab:not(.active){color:#6b7294}
+.nav-tab:not(.active):hover{color:#8fa4ff;background:rgba(99,134,255,.06)}
+.three-d-container{width:100%;aspect-ratio:16/10;background:#080c16;border-radius:14px;overflow:hidden;position:relative;cursor:grab;touch-action:none}
+.three-d-container:active{cursor:grabbing}
+.three-d-canvas{width:100%;height:100%;position:relative;perspective:1000px}
+.three-d-scene{width:100%;height:100%;position:absolute;transform-style:preserve-3d;transition:transform .05s linear}
+.three-d-face{position:absolute;backface-visibility:hidden;display:flex;align-items:center;justify-content:center}
+.three-d-face img{max-width:100%;max-height:100%;object-fit:contain}
+input[type="file"]{display:none}
+.search-input{background:rgba(99,134,255,.06);border:1px solid rgba(99,134,255,.12);border-radius:10px;padding:10px 14px 10px 38px;color:#e8e6e1;width:100%;font-size:14px;outline:none;transition:border-color .2s}
+.search-input:focus{border-color:rgba(99,134,255,.4)}
+.search-input::placeholder{color:#4a5078}
+.confirm-inline{display:flex;gap:8px;align-items:center;animation:fadeInUp .2s}
+.loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(99,134,255,.2);border-top-color:#4f6ef7;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:640px){.photo-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr))}}
+</style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full">
+  <div class="app-shell font-body" id="app">
+   <!-- Header -->
+   <header style="background:linear-gradient(180deg,#0f1528,#0a0e1a);border-bottom:1px solid rgba(99,134,255,.08);padding:16px 20px;flex-shrink:0">
+    <div style="max-width:900px;margin:0 auto">
+     <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+      <div style="width:40px;height:40px;background:linear-gradient(135deg,#4f6ef7,#6c5ce7);border-radius:10px;display:flex;align-items:center;justify-content:center">
+       <svg width="22" height="22" viewbox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+       </svg>
       </div>
-    </header>
-
-    <div class="main-layout">
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-top">
-          <h3>Estruturas do roteiro</h3>
-          <input type="search" id="searchInput" placeholder="Buscar nome do roteiro">
-        </div>
-        <div id="tabs" class="tabs"></div>
-      </aside>
-
-      <main class="content">
-        <section class="card current-card">
-          <div class="region-badge" id="regionBadge"></div>
-          <h3 id="titulo"></h3>
-
-          <div class="controls">
-            <label class="action-btn camera" for="cameraCaptureInput">📷 Tirar foto</label>
-            <label class="action-btn import" for="files">📂 Importar fotos</label>
-            <input type="file" id="files" multiple accept="image/*" class="hidden-input">
-            <input type="file" id="cameraCaptureInput" accept="image/*" capture="environment" multiple class="hidden-input">
-            <button class="action-btn pdf" id="pdfBtn" type="button">🧾 Gerar PDF</button>
-          </div>
-
-          <div class="hint">As fotos agora são exibidas sem recorte, preservando a imagem inteira.</div>
-
-          <label class="field-label" for="notes">Anotações da prática</label>
-          <textarea id="notes" placeholder="Escreva observações desta estrutura..."></textarea>
-
-          <h4>Galeria de fotos</h4>
-          <div id="galeria" class="gallery"></div>
-        </section>
-
-        <section class="card three-card">
-          <div class="three-head">
-            <div>
-              <h3>Seção 3D</h3>
-              <p>Importe 1, 2 ou mais fotos e toque em <strong>Gerar 3D</strong>. Depois, arraste para girar e use zoom com gesto de pinça ou rolagem.</p>
-            </div>
-          </div>
-
-          <div class="controls">
-            <label class="action-btn import" for="threefiles">🖼️ Importar imagens do 3D</label>
-            <input type="file" id="threefiles" multiple accept="image/*" class="hidden-input">
-            <button class="action-btn three" id="threeBtn" type="button">🧠 Gerar 3D</button>
-          </div>
-
-          <div id="threePreview" class="gallery small-gallery"></div>
-          <div id="viewer"></div>
-        </section>
-      </main>
+      <div>
+       <h1 class="font-serif" id="mainTitle" style="font-size:20px;color:#e8e6e1;line-height:1.2">Anatomia Humana — Miologia</h1>
+       <p style="font-size:11px;color:#4f6ef7;letter-spacing:1px;text-transform:uppercase;font-weight:600">UEM · DCM · Profª Drª Carmem Patrícia Barbosa</p>
+      </div>
+     </div>
     </div>
+   </header><!-- Navigation -->
+   <nav style="flex-shrink:0;border-bottom:1px solid rgba(99,134,255,.08);padding:8px 20px;overflow-x:auto;display:flex;gap:4px" id="navTabs">
+    <div class="nav-tab active" data-tab="roteiro" onclick="switchTab('roteiro')"><i data-lucide="list" style="width:14px;height:14px;display:inline;vertical-align:-2px"></i> Roteiro
+    </div>
+    <div class="nav-tab" data-tab="fotos" onclick="switchTab('fotos')"><i data-lucide="camera" style="width:14px;height:14px;display:inline;vertical-align:-2px"></i> Fotos
+    </div>
+    <div class="nav-tab" data-tab="3d" onclick="switchTab('3d')"><i data-lucide="box" style="width:14px;height:14px;display:inline;vertical-align:-2px"></i> 3D
+    </div>
+    <div class="nav-tab" data-tab="pdf" onclick="switchTab('pdf')"><i data-lucide="file-text" style="width:14px;height:14px;display:inline;vertical-align:-2px"></i> PDF
+    </div>
+   </nav><!-- Main Content -->
+   <div class="scroll-area" id="scrollArea">
+    <div style="max-width:900px;margin:0 auto;padding:20px">
+     <!-- Tab: Roteiro -->
+     <div id="tab-roteiro"></div><!-- Tab: Fotos -->
+     <div id="tab-fotos" style="display:none"></div><!-- Tab: 3D -->
+     <div id="tab-3d" style="display:none"></div><!-- Tab: PDF -->
+     <div id="tab-pdf" style="display:none"></div>
+    </div>
+   </div><!-- Footer -->
+   <footer style="flex-shrink:0;border-top:1px solid rgba(99,134,255,.08);padding:10px 20px;text-align:center;font-size:11px;color:#4a5078">
+    Responsável Tecnológico: <span style="color:#8fa4ff">Claudia Pinheiro</span> · Universidade Estadual de Maringá
+   </footer>
+  </div><!-- Photo Modal -->
+  <div id="photoModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closePhotoModal()">
+   <div class="modal-content" id="photoModalContent"></div>
+  </div><!-- Toast -->
+  <div id="toast" class="toast" style="display:none"></div>
+  <script>
+// ===== DATA =====
+const SECTIONS = [
+  {id:"gen",title:"Generalidades",items:[
+    "Ventre muscular","Tendão muscular","Aponeurose","Fáscia muscular","Septo intermuscular",
+    "Músculo de fibra paralela (ex.: m. sartório)","Músculo de fibras oblíquas (ex.: m. oblíquo externo do abdome)",
+    "Músculo semipeniforme (ex.: m. extensor longo dos dedos)","Músculo peniforme (ex.: m. reto femoral)",
+    "Músculo multipeniforme (ex.: m. deltoide)","Músculo convergente ou triangular (ex.: m. peitoral maior)",
+    "Músculo circular ou esfincteriano (ex.: m. orbicular do olho)","Músculo curto (ex.: m. pronador quadrado)",
+    "Músculo longo (ex.: m. sartório)","Músculo plano (ex.: m. oblíquo externo do abdome)",
+    "Músculo superficial (ex.: m. trapézio)","Músculo profundo (ex.: m. transverso do abdome)",
+    "Músculo fusiforme (ex.: m. tibial anterior)","Músculo bíceps (ex.: m. bíceps braquial, m. bíceps femoral)",
+    "Músculo tríceps (ex.: m. tríceps braquial, m. tríceps sural)","Músculo quadríceps (ex.: m. quadríceps femoral)",
+    "Músculo bicaudado (ex.: m. flexor curto do hálux)","Músculo policaudado (ex.: m. extensor dos dedos)",
+    "Músculo biventre (ex.: m. digástrico)","Músculo poliventre (ex.: m. reto do abdome)"
+  ]},
+  {id:"dorso",title:"Músculos do Dorso",subsections:[
+    {sub:"Extrínsecos Superficiais (toracoapendiculares)",items:[
+      "Trapézio - Parte descendente","Trapézio - Parte transversa","Trapézio - Parte ascendente",
+      "Latíssimo do dorso","Aponeurose toracolombar","Levantador da escápula","Romboide maior","Romboide menor"
+    ]},
+    {sub:"Extrínsecos Intermediários",items:["Serrátil posterior superior","Serrátil posterior inferior"]},
+    {sub:"Intrínsecos — Camada Intermediária",items:[
+      "Eretor da espinha","Espinal do tórax","Longuíssimo do tórax","Íliocostal do lombo","Aponeurose do m. eretor da espinha"
+    ]},
+    {sub:"Intrínsecos — Camada Profunda (transversoespinais)",items:[
+      "Semiespinal do tórax","Multífidos do tórax","Multífidos do lombo","Rotadores do tórax","Rotadores do lombo",
+      "Intertransversários do lombo","Interespinais do tórax","Interespinais do lombo","Levantadores das costelas"
+    ]}
+  ]},
+  {id:"torax",title:"Músculos do Tórax",subsections:[
+    {sub:"Toracoapendiculares",items:[
+      "Peitoral maior - Parte clavicular","Peitoral maior - Parte esternocostal","Peitoral maior - Parte abdominal",
+      "Peitoral menor","Subclávio","Serrátil anterior"
+    ]},
+    {sub:"Músculos Verdadeiros do Tórax",items:[
+      "Serrátil posterior superior","Serrátil posterior inferior","Levantadores das costelas",
+      "Intercostais externos","Intercostais internos","Membrana intercostal interna","Membrana intercostal externa",
+      "Transverso do tórax","Subcostais","Diafragma"
+    ]}
+  ]},
+  {id:"abdome",title:"Músculos do Abdome",items:[
+    "Reto do abdome","Lâmina anterior da bainha do m. reto do abdome","Lâmina posterior da bainha do m. reto do abdome",
+    "Intersecções tendíneas do m. reto do abdome","Oblíquo externo do abdome","Oblíquo interno do abdome",
+    "Linha alba","Transverso do abdome","Quadrado do lombo"
+  ]},
+  {id:"msup",title:"Músculos do Membro Superior",subsections:[
+    {sub:"Escapuloumerais (intrínsecos do ombro)",items:[
+      "Deltoide - Parte clavicular","Deltoide - Parte acromial","Deltoide - Parte espinal",
+      "Supra-espinal","Fáscia supra-espinal","Infra-espinal","Fáscia infra-espinal",
+      "Redondo menor","Fáscia do m. redondo menor","Redondo maior","Fáscia do m. redondo maior",
+      "Subescapular","Fáscia subescapular"
+    ]},
+    {sub:"Músculos do Braço",items:[
+      "Coracobraquial","Bíceps braquial - Cabeça curta","Bíceps braquial - Cabeça longa",
+      "Aponeurose do m. bíceps braquial","Braquial","Tríceps braquial - Cabeça longa",
+      "Tríceps braquial - Cabeça curta","Tríceps braquial - Cabeça medial","Ancôneo"
+    ]},
+    {sub:"Músculos do Antebraço",items:[
+      "Pronador redondo","Pronador quadrado","Supinador","Palmar longo","Flexor radial do carpo",
+      "Flexor ulnar do carpo","Flexor superficial dos dedos","Flexor profundo dos dedos",
+      "Flexor longo do polegar","Braquiorradial","Extensor radial longo do carpo",
+      "Extensor radial curto do carpo","Extensor ulnar do carpo","Extensor dos dedos",
+      "Extensor do dedo mínimo","Abdutor longo do polegar","Extensor curto do polegar",
+      "Extensor longo do polegar","Extensor do indicador","Palmar curto"
+    ]},
+    {sub:"Músculos da Mão",items:[
+      "Abdutor do dedo mínimo","Flexor curto do dedo mínimo","Oponente do dedo mínimo",
+      "Abdutor curto do polegar","Flexor curto do polegar","Oponente do polegar",
+      "Adutor do polegar","Lumbricais","Interósseos dorsais","Interósseos palmares"
+    ]}
+  ]},
+  {id:"minf",title:"Músculos do Membro Inferior",subsections:[
+    {sub:"Músculos Anteriores do Quadril e da Coxa",items:[
+      "Ilíaco","Psoas maior","Psoas menor","Pectíneo","Sartório","Quadríceps femoral - Reto femoral",
+      "Quadríceps femoral - Vasto lateral","Quadríceps femoral - Vasto medial","Quadríceps femoral - Vasto intermédio"
+    ]},
+    {sub:"Músculos Mediais da Coxa",items:[
+      "Adutor longo","Adutor curto","Adutor magno","Grácil"
+    ]},
+    {sub:"Músculos Anteriores da Perna",items:[
+      "Tibial anterior","Extensor longo dos dedos","Fibular terceiro","Extensor longo do hálux"
+    ]},
+    {sub:"Músculos Laterais da Perna",items:[
+      "Fibular longo","Fibular curto"
+    ]},
+    {sub:"Músculos Posteriores do Quadril e da Coxa",items:[
+      "Tensor da fáscia lata","Glúteo máximo","Glúteo médio","Glúteo mínimo","Piriforme",
+      "Gêmeo superior","Obturador interno","Gêmeo inferior","Quadrado femoral",
+      "Bíceps femoral - Cabeça longa","Bíceps femoral - Cabeça curta","Semitendíneo","Semimembranáceo"
+    ]},
+    {sub:"Músculos Posteriores da Perna",items:[
+      "Gastrocnêmio - cabeça medial","Gastrocnêmio - cabeça lateral","Sóleo","Tendão do calcâneo",
+      "Plantar","Poplíteo","Flexor longo do hálux","Tibial posterior","Flexor longo dos dedos"
+    ]},
+    {sub:"Músculos do Pé",items:[
+      "Extensor curto dos dedos","Extensor curto do hálux","Aponeurose plantar","Flexor curto dos dedos",
+      "Abdutor do hálux","Abdutor do dedo mínimo","Quadrado plantar","Tendões do m. flexor longo dos dedos",
+      "Lumbricais","Flexor curto do hálux - Cabeça medial","Tendão do flexor longo do hálux",
+      "Flexor curto do hálux - Cabeça lateral","Adutor do hálux - Cabeça oblíqua","Adutor do hálux - Cabeça transversa",
+      "Flexor curto do dedo mínimo","Oponente do dedo mínimo","Interósseos dorsais","Interósseos plantares"
+    ]}
+  ]}
+];
 
-    <footer class="footer">
-      Responsável tecnológico: Claudia Pinheiro
-    </footer>
-  </div>
+let allPhotos = [];
+let currentTab = 'roteiro';
+let searchQuery = '';
+let selectedSectionFor3D = null;
+let photos3D = [];
+let threeDRotation = {x:0,y:0};
+let isDragging3D = false;
+let dragStart3D = {x:0,y:0};
+let selectedPhotosForPDF = new Set();
 
-  <script src="js/data.js"></script>
-  <script src="js/app.js"></script>
-</body>
+// ===== CONFIG =====
+const defaultConfig = {
+  app_title: 'Anatomia Humana — Miologia',
+  student_name: '',
+  background_color: '#0a0e1a',
+  surface_color: '#12182b',
+  text_color: '#e8e6e1',
+  primary_action_color: '#4f6ef7',
+  secondary_action_color: '#8fa4ff',
+  font_family: 'DM Sans',
+  font_size: 14
+};
+
+// ===== ELEMENT SDK =====
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    const font = config.font_family || defaultConfig.font_family;
+    const size = config.font_size || defaultConfig.font_size;
+    const bg = config.background_color || defaultConfig.background_color;
+    const surface = config.surface_color || defaultConfig.surface_color;
+    const txt = config.text_color || defaultConfig.text_color;
+    const primary = config.primary_action_color || defaultConfig.primary_action_color;
+    const secondary = config.secondary_action_color || defaultConfig.secondary_action_color;
+
+    document.body.style.fontFamily = `${font}, DM Sans, system-ui, sans-serif`;
+    document.body.style.fontSize = `${size}px`;
+
+    const app = document.getElementById('app');
+    app.style.background = bg;
+    app.style.color = txt;
+
+    const title = document.getElementById('mainTitle');
+    if(title) title.textContent = config.app_title || defaultConfig.app_title;
+
+    document.querySelectorAll('.section-card').forEach(c => {
+      c.style.background = `linear-gradient(135deg, ${surface} 0%, ${surface}dd 100%)`;
+      c.style.borderColor = `${primary}20`;
+    });
+    document.querySelectorAll('.btn-primary').forEach(b => {
+      b.style.background = `linear-gradient(135deg, ${primary}, ${primary}cc)`;
+    });
+    document.querySelectorAll('.btn-secondary').forEach(b => {
+      b.style.borderColor = `${primary}33`;
+      b.style.color = secondary;
+    });
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      {get:()=>config.background_color||defaultConfig.background_color,set:(v)=>{config.background_color=v;window.elementSdk.setConfig({background_color:v})}},
+      {get:()=>config.surface_color||defaultConfig.surface_color,set:(v)=>{config.surface_color=v;window.elementSdk.setConfig({surface_color:v})}},
+      {get:()=>config.text_color||defaultConfig.text_color,set:(v)=>{config.text_color=v;window.elementSdk.setConfig({text_color:v})}},
+      {get:()=>config.primary_action_color||defaultConfig.primary_action_color,set:(v)=>{config.primary_action_color=v;window.elementSdk.setConfig({primary_action_color:v})}},
+      {get:()=>config.secondary_action_color||defaultConfig.secondary_action_color,set:(v)=>{config.secondary_action_color=v;window.elementSdk.setConfig({secondary_action_color:v})}}
+    ],
+    borderables: [],
+    fontEditable: {get:()=>config.font_family||defaultConfig.font_family,set:(v)=>{config.font_family=v;window.elementSdk.setConfig({font_family:v})}},
+    fontSizeable: {get:()=>config.font_size||defaultConfig.font_size,set:(v)=>{config.font_size=v;window.elementSdk.setConfig({font_size:v})}}
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ["app_title", config.app_title || defaultConfig.app_title],
+    ["student_name", config.student_name || defaultConfig.student_name]
+  ])
+});
+
+// ===== DATA SDK =====
+const dataHandler = {
+  onDataChanged(data) {
+    allPhotos = data;
+    if(currentTab === 'fotos') renderFotosTab();
+    if(currentTab === '3d') render3DTab();
+    if(currentTab === 'pdf') renderPDFTab();
+  }
+};
+(async()=>{
+  const r = await window.dataSdk.init(dataHandler);
+  if(!r.isOk) console.error('Data SDK init failed');
+})();
+
+// ===== TAB SWITCHING =====
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  ['roteiro','fotos','3d','pdf'].forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    if(el) el.style.display = t===tab?'block':'none';
+  });
+  if(tab==='fotos') renderFotosTab();
+  if(tab==='3d') render3DTab();
+  if(tab==='pdf') renderPDFTab();
+  document.getElementById('scrollArea').scrollTop = 0;
+}
+
+// ===== ROTEIRO TAB =====
+function renderRoteiro() {
+  const container = document.getElementById('tab-roteiro');
+  let html = `<div style="margin-bottom:20px;position:relative">
+    <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#4a5078"></i>
+    <input class="search-input" placeholder="Buscar estrutura..." oninput="searchQuery=this.value.toLowerCase();renderRoteiro()">
+  </div>`;
+
+  SECTIONS.forEach(sec => {
+    const allItems = sec.items || (sec.subsections||[]).flatMap(s=>s.items);
+    const filtered = searchQuery ? allItems.filter(i=>i.toLowerCase().includes(searchQuery)) : allItems;
+    if(searchQuery && filtered.length===0) return;
+
+    html += `<div class="section-card" style="margin-bottom:16px;padding:20px">
+      <h2 class="font-serif" style="font-size:20px;margin-bottom:14px;color:#8fa4ff">${sec.title}</h2>`;
+
+    if(sec.items) {
+      const items = searchQuery ? filtered : sec.items;
+      html += `<ol style="padding-left:20px;display:grid;gap:10px">`;
+      items.forEach((item,i) => {
+        const highlight = searchQuery && item.toLowerCase().includes(searchQuery) ? 'color:#4f6ef7;font-weight:600' : '';
+        const safeItem = item.replace(/'/g, "\\'").replace(/"/g, '\\"');
+        html += `<li style="font-size:13px;line-height:1.6;${highlight};display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <span style="flex:1">${item}</span>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button onclick="openCameraForItem('${sec.id}','${safeItem}')" style="background:rgba(79,110,247,.15);border:1px solid rgba(79,110,247,.3);color:#8fa4ff;width:26px;height:26px;border-radius:6px;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;hover:background:rgba(79,110,247,.25)" title="Tirar foto">
+              <i data-lucide="camera" style="width:13px;height:13px"></i>
+            </button>
+            <button onclick="openImportForItem('${sec.id}','${safeItem}')" style="background:rgba(99,134,255,.1);border:1px solid rgba(99,134,255,.2);color:#8fa4ff;width:26px;height:26px;border-radius:6px;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s" title="Importar arquivo">
+              <i data-lucide="upload" style="width:13px;height:13px"></i>
+            </button>
+          </div>
+        </li>`;
+      });
+      html += `</ol>`;
+    } else if(sec.subsections) {
+      sec.subsections.forEach(sub => {
+        const subItems = searchQuery ? sub.items.filter(i=>i.toLowerCase().includes(searchQuery)) : sub.items;
+        if(searchQuery && subItems.length===0) return;
+        html += `<h3 style="font-size:14px;font-weight:600;color:#6c5ce7;margin:12px 0 8px;border-left:3px solid #6c5ce7;padding-left:10px">${sub.sub}</h3>`;
+        html += `<ol style="padding-left:20px;display:grid;gap:10px">`;
+        subItems.forEach((item,idx) => {
+          const highlight = searchQuery && item.toLowerCase().includes(searchQuery) ? 'color:#4f6ef7;font-weight:600' : '';
+          const safeItem = item.replace(/'/g, "\\'").replace(/"/g, '\\"');
+          html += `<li style="font-size:13px;line-height:1.6;${highlight};display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <span style="flex:1">${item}</span>
+            <div style="display:flex;gap:6px;flex-shrink:0">
+              <button onclick="openCameraForItem('${sec.id}','${safeItem}')" style="background:rgba(79,110,247,.15);border:1px solid rgba(79,110,247,.3);color:#8fa4ff;width:26px;height:26px;border-radius:6px;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s" title="Tirar foto">
+                <i data-lucide="camera" style="width:13px;height:13px"></i>
+              </button>
+              <button onclick="openImportForItem('${sec.id}','${safeItem}')" style="background:rgba(99,134,255,.1);border:1px solid rgba(99,134,255,.2);color:#8fa4ff;width:26px;height:26px;border-radius:6px;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s" title="Importar arquivo">
+                <i data-lucide="upload" style="width:13px;height:13px"></i>
+              </button>
+            </div>
+          </li>`;
+        });
+        html += `</ol>`;
+      });
+    }
+    html += `</div>`;
+  });
+  container.innerHTML = html;
+  lucide.createIcons();
+}
+
+function openCameraForItem(sectionId, itemName) {
+  window._currentItemSection = sectionId;
+  window._currentItemName = itemName;
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.onchange = (e) => handleItemFileImport(e, true);
+  input.click();
+}
+
+function openImportForItem(sectionId, itemName) {
+  window._currentItemSection = sectionId;
+  window._currentItemName = itemName;
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.multiple = true;
+  input.onchange = (e) => handleItemFileImport(e, false);
+  input.click();
+}
+
+async function handleItemFileImport(event, fromCamera) {
+  const files = Array.from(event.target.files);
+  if(!files.length) return;
+
+  if(allPhotos.length + files.length > 999) {
+    showToast('Limite de 999 registros atingido!');
+    return;
+  }
+
+  const sectionId = window._currentItemSection;
+  const itemName = window._currentItemName;
+  
+  if(!sectionId || !itemName) return;
+
+  showToast('Salvando foto...');
+
+  for(const file of files) {
+    const dataUrl = await readFileAsDataURL(file);
+    const result = await window.dataSdk.create({
+      section_id: sectionId,
+      section_name: itemName,
+      photo_data: dataUrl,
+      note: '',
+      created_at: new Date().toISOString()
+    });
+    if(!result.isOk) {
+      showToast('Erro ao salvar foto');
+      return;
+    }
+  }
+  
+  showToast(`${files.length} foto(s) salva(s) em "${itemName}"!`);
+  window._currentItemSection = null;
+  window._currentItemName = null;
+}
+
+// ===== FOTOS TAB =====
+function renderFotosTab() {
+  const container = document.getElementById('tab-fotos');
+  let html = `<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+    <button class="btn-primary" onclick="openCamera()" style="display:flex;align-items:center;gap:6px">
+      <i data-lucide="camera" style="width:16px;height:16px"></i> Tirar Foto
+    </button>
+    <button class="btn-secondary" onclick="document.getElementById('fileInput').click()" style="display:flex;align-items:center;gap:6px">
+      <i data-lucide="upload" style="width:16px;height:16px"></i> Importar Arquivo
+    </button>
+    <input type="file" id="fileInput" accept="image/*" multiple onchange="handleFileImport(event)">
+  </div>`;
+
+  // Group by section
+  const grouped = {};
+  SECTIONS.forEach(s => grouped[s.id] = {title:s.title, photos:[]});
+  grouped['sem_secao'] = {title:'Sem Seção',photos:[]};
+  allPhotos.forEach(p => {
+    const sid = p.section_id || 'sem_secao';
+    if(!grouped[sid]) grouped[sid] = {title:sid,photos:[]};
+    grouped[sid].photos.push(p);
+  });
+
+  let hasPhotos = false;
+  Object.entries(grouped).forEach(([sid,g]) => {
+    if(g.photos.length === 0) return;
+    hasPhotos = true;
+    html += `<div class="section-card" style="padding:16px;margin-bottom:14px">
+      <h3 style="font-size:15px;font-weight:600;color:#8fa4ff;margin-bottom:10px">${g.title} <span style="color:#4a5078;font-weight:400">(${g.photos.length})</span></h3>
+      <div class="photo-grid">`;
+    g.photos.forEach(p => {
+      html += `<div class="photo-thumb" onclick="viewPhoto('${p.__backendId}')">
+        <img src="${p.photo_data}" alt="${p.section_name||'Foto'}" loading="lazy" onerror="this.style.background='#1a2240';this.alt='Indisponível'">
+        <button class="del-btn" onclick="event.stopPropagation();confirmDeletePhoto('${p.__backendId}',this)" title="Excluir">✕</button>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  if(!hasPhotos) {
+    html += `<div style="text-align:center;padding:60px 20px;color:#4a5078">
+      <i data-lucide="image" style="width:48px;height:48px;margin:0 auto 16px;display:block;opacity:.4"></i>
+      <p style="font-size:16px;margin-bottom:8px">Nenhuma foto ainda</p>
+      <p style="font-size:13px">Tire fotos ou importe arquivos para começar</p>
+    </div>`;
+  }
+
+  container.innerHTML = html;
+  lucide.createIcons();
+}
+
+// Camera
+function openCamera() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.onchange = (e) => handleFileImport(e);
+  input.click();
+}
+
+async function handleFileImport(event) {
+  const files = Array.from(event.target.files);
+  if(!files.length) return;
+
+  if(allPhotos.length + files.length > 999) {
+    showToast('Limite de 999 registros atingido!');
+    return;
+  }
+
+  // Show section picker
+  showSectionPicker(files);
+}
+
+function showSectionPicker(files) {
+  const modal = document.getElementById('photoModal');
+  const content = document.getElementById('photoModalContent');
+
+  let html = `<h3 style="font-size:18px;font-weight:600;margin-bottom:16px;color:#e8e6e1">Selecionar Seção</h3>
+    <p style="font-size:13px;color:#6b7294;margin-bottom:16px">${files.length} foto(s) — escolha a seção:</p>`;
+
+  SECTIONS.forEach(s => {
+    html += `<button class="btn-secondary" style="display:block;width:100%;text-align:left;margin-bottom:8px;padding:12px 16px" onclick="savePhotosToSection('${s.id}','${s.title}')">
+      ${s.title}
+    </button>`;
+  });
+  html += `<button class="btn-secondary" style="display:block;width:100%;text-align:left;margin-bottom:8px;padding:12px 16px;color:#6b7294" onclick="savePhotosToSection('sem_secao','Sem Seção')">
+    Sem Seção
+  </button>`;
+  html += `<button onclick="closePhotoModal()" style="margin-top:8px;background:none;border:none;color:#6b7294;cursor:pointer;font-size:14px">Cancelar</button>`;
+
+  content.innerHTML = html;
+  modal.style.display = 'flex';
+  window._pendingFiles = files;
+}
+
+async function savePhotosToSection(sectionId, sectionName) {
+  const files = window._pendingFiles;
+  if(!files) return;
+  closePhotoModal();
+  showToast('Salvando fotos...');
+
+  for(const file of files) {
+    const dataUrl = await readFileAsDataURL(file);
+    const result = await window.dataSdk.create({
+      section_id: sectionId,
+      section_name: sectionName,
+      photo_data: dataUrl,
+      note: '',
+      created_at: new Date().toISOString()
+    });
+    if(!result.isOk) {
+      showToast('Erro ao salvar foto');
+      return;
+    }
+  }
+  showToast(`${files.length} foto(s) salva(s)!`);
+  window._pendingFiles = null;
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+function viewPhoto(backendId) {
+  const photo = allPhotos.find(p => p.__backendId === backendId);
+  if(!photo) return;
+  const modal = document.getElementById('photoModal');
+  const content = document.getElementById('photoModalContent');
+  content.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-size:16px;font-weight:600;color:#e8e6e1">${photo.section_name||'Foto'}</h3>
+      <button onclick="closePhotoModal()" style="background:none;border:none;color:#6b7294;cursor:pointer;font-size:20px">✕</button>
+    </div>
+    <img src="${photo.photo_data}" style="width:100%;border-radius:10px;margin-bottom:12px" alt="${photo.section_name||''}" loading="lazy" onerror="this.style.background='#1a2240'">
+    <p style="font-size:12px;color:#4a5078">${new Date(photo.created_at).toLocaleString('pt-BR')}</p>`;
+  modal.style.display = 'flex';
+}
+
+function closePhotoModal() {
+  document.getElementById('photoModal').style.display = 'none';
+}
+
+async function confirmDeletePhoto(backendId, btn) {
+  const photo = allPhotos.find(p => p.__backendId === backendId);
+  if(!photo) return;
+  const parent = btn.parentElement;
+  parent.innerHTML = `<div class="confirm-inline" style="flex-direction:column;height:100%;justify-content:center;background:rgba(0,0,0,.8);padding:8px">
+    <span style="font-size:11px;color:#ff4757">Excluir?</span>
+    <div style="display:flex;gap:6px">
+      <button class="btn-danger" style="padding:4px 10px;font-size:11px" onclick="event.stopPropagation();doDeletePhoto('${backendId}')">Sim</button>
+      <button class="btn-secondary" style="padding:4px 10px;font-size:11px" onclick="event.stopPropagation();renderFotosTab()">Não</button>
+    </div>
+  </div>`;
+}
+
+async function doDeletePhoto(backendId) {
+  const photo = allPhotos.find(p => p.__backendId === backendId);
+  if(!photo) return;
+  const result = await window.dataSdk.delete(photo);
+  if(result.isOk) showToast('Foto excluída');
+  else showToast('Erro ao excluir');
+}
+
+// ===== 3D TAB =====
+function render3DTab() {
+  const container = document.getElementById('tab-3d');
+  const sectionPhotos = selectedSectionFor3D ? allPhotos.filter(p=>p.section_id===selectedSectionFor3D) : [];
+
+  let html = `<div style="margin-bottom:16px">
+    <label style="font-size:13px;color:#6b7294;margin-bottom:8px;display:block">Selecione a Seção:</label>
+    <select onchange="selectedSectionFor3D=this.value;photos3D=[];render3DTab()" style="width:100%;padding:10px;background:#1a2240;border:1px solid rgba(99,134,255,.15);border-radius:10px;color:#e8e6e1;font-size:14px">
+      <option value="">-- Escolha --</option>`;
+  SECTIONS.forEach(s => {
+    const count = allPhotos.filter(p=>p.section_id===s.id).length;
+    html += `<option value="${s.id}" ${selectedSectionFor3D===s.id?'selected':''}>${s.title} (${count} fotos)</option>`;
+  });
+  html += `</select></div>`;
+
+  if(selectedSectionFor3D) {
+    if(sectionPhotos.length === 0) {
+      html += `<div style="text-align:center;padding:40px;color:#4a5078">
+        <p>Nenhuma foto nesta seção. Vá para a aba Fotos para adicionar.</p>
+      </div>`;
+    } else {
+      html += `<p style="font-size:13px;color:#6b7294;margin-bottom:10px">Selecione 1 ou mais fotos para gerar o cubo 3D:</p>
+        <div class="photo-grid" style="margin-bottom:16px">`;
+      sectionPhotos.forEach(p => {
+        const sel = photos3D.includes(p.__backendId);
+        html += `<div class="photo-thumb" style="border-color:${sel?'#4f6ef7':'transparent'}" onclick="toggle3DPhoto('${p.__backendId}')">
+          <img src="${p.photo_data}" alt="" loading="lazy" onerror="this.style.background='#1a2240'">
+          ${sel?'<div style="position:absolute;bottom:4px;right:4px;background:#4f6ef7;color:#fff;width:20px;height:20px;border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center">✓</div>':''}
+        </div>`;
+      });
+      html += `</div>`;
+
+      if(photos3D.length > 0) {
+        html += `<button class="btn-primary" onclick="generate3D()" style="margin-bottom:20px;display:flex;align-items:center;gap:8px">
+          <i data-lucide="box" style="width:16px;height:16px"></i> Gerar 3D (${photos3D.length} foto${photos3D.length>1?'s':''})
+        </button>`;
+      }
+
+      html += `<div id="threeDView"></div>`;
+    }
+  }
+
+  container.innerHTML = html;
+  lucide.createIcons();
+  if(document.getElementById('threeDView') && photos3D.length > 0 && document.getElementById('threeDView').children.length > 0) {
+    // Keep existing 3D
+  }
+}
+
+function toggle3DPhoto(id) {
+  const idx = photos3D.indexOf(id);
+  if(idx>=0) photos3D.splice(idx,1);
+  else photos3D.push(id);
+  render3DTab();
+}
+
+function generate3D() {
+  const view = document.getElementById('threeDView');
+  if(!view) return;
+
+  const images = photos3D.map(id => {
+    const p = allPhotos.find(ph => ph.__backendId === id);
+    return p ? p.photo_data : null;
+  }).filter(Boolean);
+
+  if(images.length === 0) return;
+
+  threeDRotation = {x:-20,y:30};
+
+  const size = 280;
+  const half = size / 2;
+
+  // Build faces based on number of images
+  // Map images to cube faces: front, right, back, left, top, bottom
+  const faceConfigs = [
+    {transform:`translateZ(${half}px)`,label:'Frente'},
+    {transform:`rotateY(90deg) translateZ(${half}px)`,label:'Direita'},
+    {transform:`rotateY(180deg) translateZ(${half}px)`,label:'Trás'},
+    {transform:`rotateY(-90deg) translateZ(${half}px)`,label:'Esquerda'},
+    {transform:`rotateX(90deg) translateZ(${half}px)`,label:'Topo'},
+    {transform:`rotateX(-90deg) translateZ(${half}px)`,label:'Base'}
+  ];
+
+  let facesHTML = '';
+  for(let i = 0; i < 6; i++) {
+    const img = images[i % images.length];
+    const fc = faceConfigs[i];
+    facesHTML += `<div class="three-d-face" style="width:${size}px;height:${size}px;transform:${fc.transform};left:calc(50% - ${half}px);top:calc(50% - ${half}px)">
+      <img src="${img}" alt="${fc.label}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:4px" onerror="this.style.background='#1a2240'">
+    </div>`;
+  }
+
+  view.innerHTML = `<div class="three-d-container" id="cube3DContainer">
+    <div class="three-d-canvas">
+      <div class="three-d-scene" id="cube3DScene" style="transform:rotateX(${threeDRotation.x}deg) rotateY(${threeDRotation.y}deg)">
+        ${facesHTML}
+      </div>
+    </div>
+    <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:11px;color:#4a5078;pointer-events:none">
+      Arraste para rotacionar
+    </div>
+  </div>`;
+
+  // Drag to rotate
+  const container = document.getElementById('cube3DContainer');
+  const scene = document.getElementById('cube3DScene');
+
+  container.addEventListener('pointerdown', (e) => {
+    isDragging3D = true;
+    dragStart3D = {x:e.clientX,y:e.clientY};
+    container.setPointerCapture(e.pointerId);
+  });
+  container.addEventListener('pointermove', (e) => {
+    if(!isDragging3D) return;
+    const dx = e.clientX - dragStart3D.x;
+    const dy = e.clientY - dragStart3D.y;
+    threeDRotation.y += dx * 0.5;
+    threeDRotation.x -= dy * 0.5;
+    threeDRotation.x = Math.max(-90, Math.min(90, threeDRotation.x));
+    scene.style.transform = `rotateX(${threeDRotation.x}deg) rotateY(${threeDRotation.y}deg)`;
+    dragStart3D = {x:e.clientX,y:e.clientY};
+  });
+  container.addEventListener('pointerup', () => isDragging3D = false);
+  container.addEventListener('pointercancel', () => isDragging3D = false);
+}
+
+// ===== PDF TAB =====
+function renderPDFTab() {
+  const container = document.getElementById('tab-pdf');
+
+  if(allPhotos.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:60px 20px;color:#4a5078">
+      <i data-lucide="file-text" style="width:48px;height:48px;margin:0 auto 16px;display:block;opacity:.4"></i>
+      <p style="font-size:16px;margin-bottom:8px">Nenhuma foto para gerar PDF</p>
+      <p style="font-size:13px">Adicione fotos primeiro na aba Fotos</p>
+    </div>`;
+    lucide.createIcons();
+    return;
+  }
+
+  let html = `<div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div>
+      <h3 style="font-size:16px;font-weight:600;color:#e8e6e1">Gerar PDF</h3>
+      <p style="font-size:13px;color:#6b7294">Selecione as fotos que deseja incluir</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-secondary" onclick="selectAllPDF()" style="font-size:13px">Selecionar Todas</button>
+      <button class="btn-secondary" onclick="deselectAllPDF()" style="font-size:13px">Desmarcar</button>
+    </div>
+  </div>`;
+
+  // Group by section
+  SECTIONS.forEach(sec => {
+    const secPhotos = allPhotos.filter(p=>p.section_id===sec.id);
+    if(secPhotos.length === 0) return;
+    html += `<div class="section-card" style="padding:16px;margin-bottom:12px">
+      <h4 style="font-size:14px;font-weight:600;color:#8fa4ff;margin-bottom:10px">${sec.title}</h4>
+      <div class="photo-grid">`;
+    secPhotos.forEach(p => {
+      const sel = selectedPhotosForPDF.has(p.__backendId);
+      html += `<div class="photo-thumb" style="border-color:${sel?'#4f6ef7':'transparent'}" onclick="togglePDFPhoto('${p.__backendId}')">
+        <img src="${p.photo_data}" alt="" loading="lazy" onerror="this.style.background='#1a2240'">
+        ${sel?'<div style="position:absolute;bottom:4px;right:4px;background:#4f6ef7;color:#fff;width:20px;height:20px;border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center">✓</div>':''}
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  // Unsectioned
+  const unsec = allPhotos.filter(p=>!p.section_id||p.section_id==='sem_secao');
+  if(unsec.length > 0) {
+    html += `<div class="section-card" style="padding:16px;margin-bottom:12px">
+      <h4 style="font-size:14px;font-weight:600;color:#8fa4ff;margin-bottom:10px">Sem Seção</h4>
+      <div class="photo-grid">`;
+    unsec.forEach(p => {
+      const sel = selectedPhotosForPDF.has(p.__backendId);
+      html += `<div class="photo-thumb" style="border-color:${sel?'#4f6ef7':'transparent'}" onclick="togglePDFPhoto('${p.__backendId}')">
+        <img src="${p.photo_data}" alt="" loading="lazy" onerror="this.style.background='#1a2240'">
+        ${sel?'<div style="position:absolute;bottom:4px;right:4px;background:#4f6ef7;color:#fff;width:20px;height:20px;border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center">✓</div>':''}
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  if(selectedPhotosForPDF.size > 0) {
+    html += `<button class="btn-primary" onclick="generatePDF()" style="margin-top:10px;width:100%;padding:14px;font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px">
+      <i data-lucide="download" style="width:18px;height:18px"></i> Gerar PDF (${selectedPhotosForPDF.size} foto${selectedPhotosForPDF.size>1?'s':''})
+    </button>`;
+  }
+
+  container.innerHTML = html;
+  lucide.createIcons();
+}
+
+function togglePDFPhoto(id) {
+  if(selectedPhotosForPDF.has(id)) selectedPhotosForPDF.delete(id);
+  else selectedPhotosForPDF.add(id);
+  renderPDFTab();
+}
+
+function selectAllPDF() {
+  allPhotos.forEach(p => selectedPhotosForPDF.add(p.__backendId));
+  renderPDFTab();
+}
+
+function deselectAllPDF() {
+  selectedPhotosForPDF.clear();
+  renderPDFTab();
+}
+
+function generatePDF() {
+  const selected = allPhotos.filter(p => selectedPhotosForPDF.has(p.__backendId));
+  if(selected.length === 0) return;
+
+  const studentName = (window.elementSdk.config && window.elementSdk.config.student_name) || '';
+
+  // Group by section for PDF
+  const grouped = {};
+  selected.forEach(p => {
+    const key = p.section_name || 'Sem Seção';
+    if(!grouped[key]) grouped[key] = [];
+    grouped[key].push(p);
+  });
+
+  // Build HTML for print
+  let pdfHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>
+      @page{margin:20mm;size:A4}
+      body{font-family:Arial,sans-serif;color:#222;margin:0;padding:0}
+      .header{text-align:center;margin-bottom:30px;border-bottom:2px solid #4f6ef7;padding-bottom:20px}
+      .header h1{font-size:22px;margin:0 0 4px}
+      .header h2{font-size:16px;margin:0 0 4px;color:#555}
+      .header p{font-size:12px;color:#777;margin:2px 0}
+      .section-title{font-size:18px;color:#4f6ef7;margin:24px 0 12px;border-left:4px solid #4f6ef7;padding-left:10px}
+      .photo-container{display:inline-block;width:45%;margin:8px 2%;vertical-align:top;text-align:center}
+      .photo-container img{max-width:100%;max-height:260px;border:1px solid #ddd;border-radius:6px}
+      .photo-container p{font-size:10px;color:#999;margin-top:4px}
+      .footer{text-align:center;margin-top:40px;padding-top:16px;border-top:1px solid #ddd;font-size:10px;color:#999}
+      @media print{.no-print{display:none}}
+    </style></head><body>
+    <div class="header">
+      <h1>Anatomia Humana — Miologia</h1>
+      <h2>Universidade Estadual de Maringá · DCM</h2>
+      <p>Profª Drª Carmem Patrícia Barbosa</p>
+      ${studentName?`<p>Aluno(a): ${studentName}</p>`:''}
+      <p>${new Date().toLocaleDateString('pt-BR')}</p>
+    </div>
+    <button class="no-print" onclick="window.print()" style="display:block;margin:0 auto 20px;padding:10px 30px;background:#4f6ef7;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer">Imprimir / Salvar PDF</button>`;
+
+  Object.entries(grouped).forEach(([section, photos]) => {
+    pdfHTML += `<div class="section-title">${section}</div><div>`;
+    photos.forEach(p => {
+      pdfHTML += `<div class="photo-container">
+        <img src="${p.photo_data}" alt="${p.section_name||''}">
+        <p>${new Date(p.created_at).toLocaleString('pt-BR')}</p>
+      </div>`;
+    });
+    pdfHTML += `</div>`;
+  });
+
+  pdfHTML += `<div class="footer">Responsável Tecnológico: Claudia Pinheiro · Universidade Estadual de Maringá</div></body></html>`;
+
+  const win = window.open('', '_blank');
+  if(win) {
+    win.document.write(pdfHTML);
+    win.document.close();
+  } else {
+    showToast('Habilite pop-ups para gerar o PDF');
+  }
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.style.display = 'none', 3000);
+}
+
+// ===== INIT =====
+renderRoteiro();
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ea02c1c553db816',t:'MTc3NTgwNzU0OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
