@@ -583,6 +583,11 @@ let currentSectionIndex = 0;
 let deferredPrompt = null;
 let rendererRef = null, sceneRef = null, cameraRef = null, modelGroup = null, animId = null;
 let isDragging = false, lastX = 0, lastY = 0, zoom = 6, rotX = 0, rotY = 0, pinchStartDist = null;
+let renderToken = 0;
+
+const DB_NAME = 'miologia-pwa-db';
+const DB_VERSION = 1;
+const PHOTO_STORE = 'photos';
 
 const tabs = document.getElementById('tabs');
 const searchInput = document.getElementById('searchInput');
@@ -599,6 +604,161 @@ const openMenuBtn = document.getElementById('openMenuBtn');
 
 function sectionItemKey(sectionIndex, itemIndex, suffix){
   return `miologia:${sectionIndex}:${itemIndex}:${suffix}`;
+}
+
+function photoGroupKey(sectionIndex, itemIndex){
+  return `item:${sectionIndex}:${itemIndex}`;
+}
+
+function threeGroupKey(){
+  return `three:images`;
+}
+
+function openDB(){
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(PHOTO_STORE)) {
+        const store = db.createObjectStore(PHOTO_STORE, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('groupKey', 'groupKey', { unique: false });
+        store.createIndex('createdAt', 'createdAt', { unique: false });
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function dbAddPhoto(groupKey, blob, meta = {}){
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, 'readwrite');
+    const store = tx.objectStore(PHOTO_STORE);
+    const request = store.add({
+      groupKey,
+      blob,
+      createdAt: Date.now(),
+      name: meta.name || '',
+      type: blob.type || meta.type || 'image/jpeg'
+    });
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function dbGetPhotos(groupKey){
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, 'readonly');
+    const store = tx.objectStore(PHOTO_STORE);
+    const index = store.index('groupKey');
+    const request = index.getAll(groupKey);
+    request.onsuccess = () => {
+      const rows = request.result || [];
+      rows.sort((a, b) => a.createdAt - b.createdAt);
+      resolve(rows);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function dbDeletePhoto(id){
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, 'readwrite');
+    const store = tx.objectStore(PHOTO_STORE);
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function saveItemNotes(sectionIndex, itemIndex, value){
+  localStorage.setItem(sectionItemKey(sectionIndex, itemIndex, 'notes'), value);
+}
+
+function dataUrlToBlob(dataUrl){
+  const parts = dataUrl.split(',');
+  const mimeMatch = parts[0].match(/:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+  const binary = atob(parts[1]);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new Blob([bytes], { type: mime });
+}
+
+function fileToImageBitmapSource(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function compressImage(file, maxWidth = 1600, maxHeight = 1600, quality = 0.82){
+  const source = await fileToImageBitmapSource(file);
+  let { width, height } = source;
+
+  const ratio = Math.min(maxWidth / width, maxHeight / height, 1);
+  const targetWidth = Math.round(width * ratio);
+  const targetHeight = Math.round(height * ratio);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+
+  const ctx = canvas.getContext('2d', { alpha: false });
+  ctx.drawImage(source, 0, 0, targetWidth, targetHeight);
+
+  const blob = await new Promise((resolve) => {
+    canvas.toBlob(
+      (b) => resolve(b || file),
+      'image/jpeg',
+      quality
+    );
+  });
+
+  return blob;
+}
+
+async function addItemImages(files, sectionIndex, itemIndex){
+  const arr = Array.from(files || []);
+  if (!arr.length) return;
+
+  const groupKey = photoGroupKey(sectionIndex, itemIndex);
+
+  try {
+    for (const file of arr) {
+      const compressedBlob = await compressImage(file);
+      await dbAddPhoto(groupKey, compressedBlob, { name: file.name, type: compressedBlob.type });
+    }
+    await renderItems();
+  } catch (error) {
+    console.error('Erro ao salvar imagens do item:', error);
+    alert('Não foi possível salvar uma ou mais imagens. O armazenamento local pode estar cheio.');
+  }
+}
+
+async function deleteItemImage(photoId){
+  try {
+    await dbDeletePhoto(photoId);
+    await renderItems();
+  } catch (error) {
+    console.error('Erro ao excluir imagem:', error);
+    alert('Não foi possível excluir esta imagem.');
+  }
 }
 
 function buildTabs(){
@@ -618,66 +778,39 @@ function buildTabs(){
     b.className = 'tab-btn' + (idx === currentSectionIndex ? ' active' : '');
     b.textContent = sec.title;
     b.type = 'button';
-    b.onclick = () => {
+    b.onclick = async () => {
       currentSectionIndex = idx;
-      loadSection();
+      await loadSection();
       buildTabs();
     };
     tabs.appendChild(b);
   });
 }
 
-function loadSection(){
+async function loadSection(){
   const sec = SECTIONS[currentSectionIndex];
   regionBadge.textContent = sec.title;
   sectionTitle.textContent = sec.title;
-  renderItems();
+  await renderItems();
 }
 
-function saveItemNotes(sectionIndex, itemIndex, value){
-  localStorage.setItem(sectionItemKey(sectionIndex, itemIndex, 'notes'), value);
-}
-
-function addItemImages(files, sectionIndex, itemIndex){
-  const arr = Array.from(files || []);
-  if (!arr.length) return;
-
-  const key = sectionItemKey(sectionIndex, itemIndex, 'imgs');
-  const current = JSON.parse(localStorage.getItem(key) || '[]');
-  let pending = arr.length;
-
-  arr.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      current.push(reader.result);
-      pending--;
-      if (pending === 0) {
-        localStorage.setItem(key, JSON.stringify(current));
-        renderItems();
-      }
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-function deleteItemImage(sectionIndex, itemIndex, imgIndex){
-  const key = sectionItemKey(sectionIndex, itemIndex, 'imgs');
-  const arr = JSON.parse(localStorage.getItem(key) || '[]');
-  arr.splice(imgIndex, 1);
-  localStorage.setItem(key, JSON.stringify(arr));
-  renderItems();
-}
-
-function renderItems(){
+async function renderItems(){
+  const myToken = ++renderToken;
   const sec = SECTIONS[currentSectionIndex];
+  const sectionIndex = currentSectionIndex;
   const q = (searchInput.value || '').toLowerCase().trim();
   itemsContainer.innerHTML = '';
 
-  sec.items.forEach((item, itemIndex) => {
-    if (q && !item.toLowerCase().includes(q) && !sec.title.toLowerCase().includes(q)) return;
+  for (let itemIndex = 0; itemIndex < sec.items.length; itemIndex++) {
+    if (myToken !== renderToken) return;
 
-    const notesValue = localStorage.getItem(sectionItemKey(currentSectionIndex, itemIndex, 'notes')) || '';
-    const imgs = JSON.parse(localStorage.getItem(sectionItemKey(currentSectionIndex, itemIndex, 'imgs')) || '[]');
+    const item = sec.items[itemIndex];
+    if (q && !item.toLowerCase().includes(q) && !sec.title.toLowerCase().includes(q)) continue;
+
+    const notesValue = localStorage.getItem(sectionItemKey(sectionIndex, itemIndex, 'notes')) || '';
+    const imgs = await dbGetPhotos(photoGroupKey(sectionIndex, itemIndex));
+
+    if (myToken !== renderToken) return;
 
     const card = document.createElement('div');
     card.className = 'item-card';
@@ -689,8 +822,8 @@ function renderItems(){
     const controls = document.createElement('div');
     controls.className = 'item-controls';
 
-    const camId = `camera-${currentSectionIndex}-${itemIndex}`;
-    const impId = `import-${currentSectionIndex}-${itemIndex}`;
+    const camId = `camera-${sectionIndex}-${itemIndex}`;
+    const impId = `import-${sectionIndex}-${itemIndex}`;
 
     const camLabel = document.createElement('label');
     camLabel.className = 'action photo';
@@ -711,10 +844,10 @@ function renderItems(){
     cameraInputEl.type = 'file';
     cameraInputEl.accept = 'image/*';
     cameraInputEl.setAttribute('capture', 'environment');
-    cameraInputEl.multiple = true;
+    cameraInputEl.multiple = false;
     cameraInputEl.id = camId;
-    cameraInputEl.addEventListener('change', (e) => {
-      addItemImages(e.target.files, currentSectionIndex, itemIndex);
+    cameraInputEl.addEventListener('change', async (e) => {
+      await addItemImages(e.target.files, sectionIndex, itemIndex);
       e.target.value = '';
     });
     card.appendChild(cameraInputEl);
@@ -725,8 +858,8 @@ function renderItems(){
     importInputEl.accept = 'image/*';
     importInputEl.multiple = true;
     importInputEl.id = impId;
-    importInputEl.addEventListener('change', (e) => {
-      addItemImages(e.target.files, currentSectionIndex, itemIndex);
+    importInputEl.addEventListener('change', async (e) => {
+      await addItemImages(e.target.files, sectionIndex, itemIndex);
       e.target.value = '';
     });
     card.appendChild(importInputEl);
@@ -736,27 +869,29 @@ function renderItems(){
     textarea.placeholder = 'Anotações desta estrutura';
     textarea.value = notesValue;
     textarea.addEventListener('input', (e) => {
-      saveItemNotes(currentSectionIndex, itemIndex, e.target.value);
+      saveItemNotes(sectionIndex, itemIndex, e.target.value);
     });
     card.appendChild(textarea);
 
     const gallery = document.createElement('div');
     gallery.className = 'item-gallery';
 
-    imgs.forEach((src, imgIndex) => {
+    imgs.forEach((row) => {
       const photoCard = document.createElement('div');
       photoCard.className = 'photo-card';
 
       const img = document.createElement('img');
-      img.src = src;
+      const objectUrl = URL.createObjectURL(row.blob);
+      img.src = objectUrl;
       img.alt = item;
+      img.onload = () => URL.revokeObjectURL(objectUrl);
       photoCard.appendChild(img);
 
       const del = document.createElement('button');
       del.type = 'button';
       del.textContent = 'Excluir';
-      del.addEventListener('click', () => {
-        deleteItemImage(currentSectionIndex, itemIndex, imgIndex);
+      del.addEventListener('click', async () => {
+        await deleteItemImage(row.id);
       });
 
       photoCard.appendChild(del);
@@ -765,55 +900,54 @@ function renderItems(){
 
     card.appendChild(gallery);
     itemsContainer.appendChild(card);
-  });
+  }
 }
 
-function add3DImages(files){
+async function add3DImages(files){
   const arr = Array.from(files || []);
   if (!arr.length) return;
-  const key = 'miologia:3dimgs';
-  const current = JSON.parse(localStorage.getItem(key) || '[]');
-  let pending = arr.length;
 
-  arr.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      current.push(reader.result);
-      pending--;
-      if (pending === 0) {
-        localStorage.setItem(key, JSON.stringify(current));
-        render3DPreview();
-      }
-    };
-    reader.readAsDataURL(file);
-  });
+  try {
+    for (const file of arr) {
+      const compressedBlob = await compressImage(file, 1400, 1400, 0.8);
+      await dbAddPhoto(threeGroupKey(), compressedBlob, { name: file.name, type: compressedBlob.type });
+    }
+    await render3DPreview();
+  } catch (error) {
+    console.error('Erro ao salvar imagens do 3D:', error);
+    alert('Não foi possível salvar uma ou mais imagens da seção 3D.');
+  }
 }
 
-function render3DPreview(){
+async function render3DPreview(){
   threePreview.innerHTML = '';
-  const imgs = JSON.parse(localStorage.getItem('miologia:3dimgs') || '[]');
+  try {
+    const imgs = await dbGetPhotos(threeGroupKey());
 
-  imgs.forEach((src, idx) => {
-    const card = document.createElement('div');
-    card.className = 'photo-card';
+    imgs.forEach((row) => {
+      const card = document.createElement('div');
+      card.className = 'photo-card';
 
-    const img = document.createElement('img');
-    img.src = src;
-    img.alt = 'Imagem para 3D';
-    card.appendChild(img);
+      const img = document.createElement('img');
+      const objectUrl = URL.createObjectURL(row.blob);
+      img.src = objectUrl;
+      img.alt = 'Imagem para 3D';
+      img.onload = () => URL.revokeObjectURL(objectUrl);
+      card.appendChild(img);
 
-    const del = document.createElement('button');
-    del.textContent = 'Excluir';
-    del.onclick = () => {
-      const arr = JSON.parse(localStorage.getItem('miologia:3dimgs') || '[]');
-      arr.splice(idx, 1);
-      localStorage.setItem('miologia:3dimgs', JSON.stringify(arr));
-      render3DPreview();
-    };
+      const del = document.createElement('button');
+      del.textContent = 'Excluir';
+      del.onclick = async () => {
+        await dbDeletePhoto(row.id);
+        await render3DPreview();
+      };
 
-    card.appendChild(del);
-    threePreview.appendChild(card);
-  });
+      card.appendChild(del);
+      threePreview.appendChild(card);
+    });
+  } catch (error) {
+    console.error('Erro ao renderizar prévias do 3D:', error);
+  }
 }
 
 function clear3D(){
@@ -853,6 +987,7 @@ function bind3DControls(){
 
   viewer.onpointerup = () => { isDragging = false; };
   viewer.onpointercancel = () => { isDragging = false; };
+  viewer.onpointerleave = () => { isDragging = false; };
 
   viewer.onwheel = e => {
     e.preventDefault();
@@ -866,7 +1001,7 @@ function bind3DControls(){
       e.preventDefault();
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.sqrt(dx*dx + dy*dy);
+      const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (pinchStartDist !== null) {
         const delta = pinchStartDist - dist;
@@ -881,12 +1016,12 @@ function bind3DControls(){
   viewer.ontouchend = () => { pinchStartDist = null; };
 }
 
-function gerar3D(){
+async function gerar3D(){
   clear3D();
 
   sceneRef = new THREE.Scene();
   cameraRef = new THREE.PerspectiveCamera(70, viewer.clientWidth / viewer.clientHeight, 0.1, 1000);
-  rendererRef = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  rendererRef = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   rendererRef.setSize(viewer.clientWidth, viewer.clientHeight);
   rendererRef.setPixelRatio(window.devicePixelRatio || 1);
   viewer.appendChild(rendererRef.domElement);
@@ -901,7 +1036,12 @@ function gerar3D(){
   modelGroup = new THREE.Group();
   sceneRef.add(modelGroup);
 
-  const imgs = JSON.parse(localStorage.getItem('miologia:3dimgs') || '[]');
+  let imgs = [];
+  try {
+    imgs = await dbGetPhotos(threeGroupKey());
+  } catch (error) {
+    console.error('Erro ao carregar imagens do 3D:', error);
+  }
 
   if (!imgs.length) {
     const geo = new THREE.TorusKnotGeometry(1.1, 0.35, 120, 16);
@@ -910,14 +1050,19 @@ function gerar3D(){
     modelGroup.add(mesh);
   } else {
     const loader = new THREE.TextureLoader();
-    imgs.forEach((src, i) => {
-      const tex = loader.load(src);
+    imgs.forEach((row, i) => {
+      const objectUrl = URL.createObjectURL(row.blob);
+      const tex = loader.load(objectUrl, () => {
+        URL.revokeObjectURL(objectUrl);
+      });
+
       const geo = new THREE.PlaneGeometry(2.4, 2.4);
       const mat = new THREE.MeshBasicMaterial({
         map: tex,
         side: THREE.DoubleSide,
         transparent: true
       });
+
       const mesh = new THREE.Mesh(geo, mat);
       const angle = (Math.PI * 2 / imgs.length) * i;
       const radius = Math.max(1.5, imgs.length * 0.08);
@@ -941,14 +1086,14 @@ function gerar3D(){
   animate();
 }
 
-threeInput.addEventListener('change', e => {
-  add3DImages(e.target.files);
+threeInput.addEventListener('change', async e => {
+  await add3DImages(e.target.files);
   e.target.value = '';
 });
 
-searchInput.addEventListener('input', () => {
+searchInput.addEventListener('input', async () => {
   buildTabs();
-  renderItems();
+  await renderItems();
 });
 
 pdfBtn.addEventListener('click', () => window.print());
@@ -962,14 +1107,14 @@ window.addEventListener('beforeinstallprompt', e => {
 
 installBtn.addEventListener('click', async () => {
   if (deferredPrompt) {
-    deferredPrompt.prompt();
+    await deferredPrompt.prompt();
   } else {
     alert('No celular, abra o menu do navegador e escolha "Adicionar à tela inicial".');
   }
 });
 
 openMenuBtn.addEventListener('click', () => {
-  document.getElementById('sidebar').scrollIntoView({behavior:'smooth'});
+  document.getElementById('sidebar').scrollIntoView({ behavior: 'smooth' });
 });
 
 window.addEventListener('resize', () => {
@@ -979,6 +1124,17 @@ window.addEventListener('resize', () => {
     rendererRef.setSize(viewer.clientWidth, viewer.clientHeight);
   }
 });
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      await navigator.serviceWorker.register('./sw.js');
+      console.log('Service worker registrado com sucesso.');
+    } catch (error) {
+      console.error('Erro ao registrar service worker:', error);
+    }
+  });
+}
 
 buildTabs();
 loadSection();
