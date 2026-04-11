@@ -832,31 +832,21 @@ async function compressImage(file, maxWidth = 1600, maxHeight = 1600, quality = 
   return blob;
 }
 
-async function addItemImages(files, sectionIndex, itemIndex){
+async function addPhotosToGroup(files, groupKey){
   const arr = Array.from(files || []);
   if (!arr.length) return;
-
-  const groupKey = photoGroupKey(sectionIndex, itemIndex);
 
   try {
     for (const file of arr) {
       const compressedBlob = await compressImage(file);
-      await dbAddPhoto(groupKey, compressedBlob, { name: file.name, type: compressedBlob.type });
+      await dbAddPhoto(groupKey, compressedBlob, {
+        name: file.name,
+        type: compressedBlob.type
+      });
     }
-    await renderItems();
   } catch (error) {
-    console.error('Erro ao salvar imagens do item:', error);
-    alert('Não foi possível salvar uma ou mais imagens. O armazenamento local pode estar cheio.');
-  }
-}
-
-async function deleteItemImage(photoId){
-  try {
-    await dbDeletePhoto(photoId);
-    await renderItems();
-  } catch (error) {
-    console.error('Erro ao excluir imagem:', error);
-    alert('Não foi possível excluir esta imagem.');
+    console.error('Erro ao salvar fotos:', error);
+    alert('Não foi possível salvar uma ou mais imagens.');
   }
 }
 
@@ -865,7 +855,13 @@ function buildTabs(){
   tabs.innerHTML = '';
 
   SECTIONS.forEach((sec, idx) => {
-    const text = (sec.title + ' ' + sec.items.join(' ')).toLowerCase();
+    const text = (
+      sec.title + ' ' +
+      (sec.subSections || [])
+        .map(sub => `${sub.title} ${(sub.items || []).join(' ')}`)
+        .join(' ')
+    ).toLowerCase();
+
     if (q && !text.includes(q)) return;
 
     const region = document.createElement('div');
@@ -898,111 +894,146 @@ async function renderItems(){
   const sec = SECTIONS[currentSectionIndex];
   const sectionIndex = currentSectionIndex;
   const q = (searchInput.value || '').toLowerCase().trim();
+
   itemsContainer.innerHTML = '';
 
-  for (let itemIndex = 0; itemIndex < sec.items.length; itemIndex++) {
+  for (let subIndex = 0; subIndex < sec.subSections.length; subIndex++) {
     if (myToken !== renderToken) return;
 
-    const item = sec.items[itemIndex];
-    if (q && !item.toLowerCase().includes(q) && !sec.title.toLowerCase().includes(q)) continue;
+    const sub = sec.subSections[subIndex];
+    const subTitle = sub.title || '';
+    const originalItems = sub.items || [];
 
-    const notesValue = localStorage.getItem(sectionItemKey(sectionIndex, itemIndex, 'notes')) || '';
-    const imgs = await dbGetPhotos(photoGroupKey(sectionIndex, itemIndex));
-
-    if (myToken !== renderToken) return;
-
-    const card = document.createElement('div');
-    card.className = 'item-card';
-
-    const titleEl = document.createElement('h4');
-    titleEl.textContent = item;
-    card.appendChild(titleEl);
-
-    const controls = document.createElement('div');
-    controls.className = 'item-controls';
-
-    const camId = `camera-${sectionIndex}-${itemIndex}`;
-    const impId = `import-${sectionIndex}-${itemIndex}`;
-
-    const camLabel = document.createElement('label');
-    camLabel.className = 'action photo';
-    camLabel.setAttribute('for', camId);
-    camLabel.textContent = '📷 Tirar foto';
-
-    const importLabel = document.createElement('label');
-    importLabel.className = 'action import';
-    importLabel.setAttribute('for', impId);
-    importLabel.textContent = '📂 Importar arquivos';
-
-    controls.appendChild(camLabel);
-    controls.appendChild(importLabel);
-    card.appendChild(controls);
-
-    const cameraInputEl = document.createElement('input');
-    cameraInputEl.className = 'hidden';
-    cameraInputEl.type = 'file';
-    cameraInputEl.accept = 'image/*';
-    cameraInputEl.setAttribute('capture', 'environment');
-    cameraInputEl.multiple = false;
-    cameraInputEl.id = camId;
-    cameraInputEl.addEventListener('change', async (e) => {
-      await addItemImages(e.target.files, sectionIndex, itemIndex);
-      e.target.value = '';
+    const filteredItems = originalItems.filter(item => {
+      if (!q) return true;
+      return (
+        sec.title.toLowerCase().includes(q) ||
+        subTitle.toLowerCase().includes(q) ||
+        item.toLowerCase().includes(q)
+      );
     });
-    card.appendChild(cameraInputEl);
 
-    const importInputEl = document.createElement('input');
-    importInputEl.className = 'hidden';
-    importInputEl.type = 'file';
-    importInputEl.accept = 'image/*';
-    importInputEl.multiple = true;
-    importInputEl.id = impId;
-    importInputEl.addEventListener('change', async (e) => {
-      await addItemImages(e.target.files, sectionIndex, itemIndex);
-      e.target.value = '';
-    });
-    card.appendChild(importInputEl);
+    const shouldShowSubTitle =
+      !q ||
+      subTitle.toLowerCase().includes(q) ||
+      filteredItems.length > 0;
 
-    const textarea = document.createElement('textarea');
-    textarea.className = 'item-notes';
-    textarea.placeholder = 'Anotações desta estrutura';
-    textarea.value = notesValue;
-    textarea.addEventListener('input', (e) => {
-      saveItemNotes(sectionIndex, itemIndex, e.target.value);
-    });
-    card.appendChild(textarea);
+    if (!shouldShowSubTitle) continue;
 
-    const gallery = document.createElement('div');
-    gallery.className = 'item-gallery';
+    const groupTitle = document.createElement('h3');
+    groupTitle.style.margin = '24px 0 12px';
+    groupTitle.style.color = 'var(--cyan)';
+    groupTitle.style.fontSize = '1.05rem';
+    groupTitle.style.letterSpacing = '.04em';
+    groupTitle.style.fontWeight = '800';
+    groupTitle.textContent = subTitle;
+    itemsContainer.appendChild(groupTitle);
 
-    imgs.forEach((row) => {
-      const photoCard = document.createElement('div');
-      photoCard.className = 'photo-card';
+    for (let itemIndex = 0; itemIndex < originalItems.length; itemIndex++) {
+      if (myToken !== renderToken) return;
 
-      const img = document.createElement('img');
-      const objectUrl = URL.createObjectURL(row.blob);
-      img.src = objectUrl;
-      img.alt = item;
-      img.onload = () => URL.revokeObjectURL(objectUrl);
-      photoCard.appendChild(img);
+      const item = originalItems[itemIndex];
+      if (!filteredItems.includes(item)) continue;
 
-      const del = document.createElement('button');
-      del.type = 'button';
-      del.textContent = 'Excluir';
-      del.addEventListener('click', async () => {
-        await deleteItemImage(row.id);
+      const storageKeyBase = `${sectionIndex}:${subIndex}:${itemIndex}`;
+      const notesValue = localStorage.getItem(`miologia:${storageKeyBase}:notes`) || '';
+      const imgs = await dbGetPhotos(`item:${storageKeyBase}`);
+
+      const card = document.createElement('div');
+      card.className = 'item-card';
+
+      const titleEl = document.createElement('h4');
+      titleEl.textContent = item;
+      card.appendChild(titleEl);
+
+      const controls = document.createElement('div');
+      controls.className = 'item-controls';
+
+      const camId = `camera-${sectionIndex}-${subIndex}-${itemIndex}`;
+      const impId = `import-${sectionIndex}-${subIndex}-${itemIndex}`;
+
+      const camLabel = document.createElement('label');
+      camLabel.className = 'action photo';
+      camLabel.setAttribute('for', camId);
+      camLabel.textContent = '📷 Tirar foto';
+
+      const importLabel = document.createElement('label');
+      importLabel.className = 'action import';
+      importLabel.setAttribute('for', impId);
+      importLabel.textContent = '📂 Importar arquivos';
+
+      controls.appendChild(camLabel);
+      controls.appendChild(importLabel);
+      card.appendChild(controls);
+
+      const cameraInputEl = document.createElement('input');
+      cameraInputEl.className = 'hidden';
+      cameraInputEl.type = 'file';
+      cameraInputEl.accept = 'image/*';
+      cameraInputEl.setAttribute('capture', 'environment');
+      cameraInputEl.multiple = false;
+      cameraInputEl.id = camId;
+      cameraInputEl.addEventListener('change', async (e) => {
+        await addPhotosToGroup(e.target.files, `item:${storageKeyBase}`);
+        e.target.value = '';
+        await renderItems();
+      });
+      card.appendChild(cameraInputEl);
+
+      const importInputEl = document.createElement('input');
+      importInputEl.className = 'hidden';
+      importInputEl.type = 'file';
+      importInputEl.accept = 'image/*';
+      importInputEl.multiple = true;
+      importInputEl.id = impId;
+      importInputEl.addEventListener('change', async (e) => {
+        await addPhotosToGroup(e.target.files, `item:${storageKeyBase}`);
+        e.target.value = '';
+        await renderItems();
+      });
+      card.appendChild(importInputEl);
+
+      const textarea = document.createElement('textarea');
+      textarea.className = 'item-notes';
+      textarea.placeholder = 'Anotações desta estrutura';
+      textarea.value = notesValue;
+      textarea.addEventListener('input', (e) => {
+        localStorage.setItem(`miologia:${storageKeyBase}:notes`, e.target.value);
+      });
+      card.appendChild(textarea);
+
+      const gallery = document.createElement('div');
+      gallery.className = 'item-gallery';
+
+      imgs.forEach((row) => {
+        const photoCard = document.createElement('div');
+        photoCard.className = 'photo-card';
+
+        const img = document.createElement('img');
+        const objectUrl = URL.createObjectURL(row.blob);
+        img.src = objectUrl;
+        img.alt = item;
+        img.onload = () => URL.revokeObjectURL(objectUrl);
+        photoCard.appendChild(img);
+
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.textContent = 'Excluir';
+        del.addEventListener('click', async () => {
+          await dbDeletePhoto(row.id);
+          await renderItems();
+        });
+
+        photoCard.appendChild(del);
+        gallery.appendChild(photoCard);
       });
 
-      photoCard.appendChild(del);
-      gallery.appendChild(photoCard);
-    });
-
-    card.appendChild(gallery);
-    itemsContainer.appendChild(card);
+      card.appendChild(gallery);
+      itemsContainer.appendChild(card);
+    }
   }
 }
-
-async function add3DImages(files){
+  async function add3DImages(files){
   const arr = Array.from(files || []);
   if (!arr.length) return;
 
